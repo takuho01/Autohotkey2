@@ -183,7 +183,7 @@ F13 & Space:: send ^{Space}
         return
 
     ;; toggle window
-    F13 & LButton::
+    ^LButton::
         ; MsgBox, %m1_sta_max% %m2_sta_max%
         CoordMode, Mouse, Screen ;; mouse absolute pos setting
         MouseGetPos, X, Y
@@ -217,7 +217,7 @@ F13 & Space:: send ^{Space}
         return
     
     ;; toggle window maxmin
-    F13 & RButton::
+    ^RButton::
         resize_toggle_minmax()
         return
     

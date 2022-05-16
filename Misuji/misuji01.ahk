@@ -221,6 +221,14 @@ F13 & Space:: send ^{Space}
         resize_toggle_minmax()
         return
     
+    ;; alternative ctrl click
+    ^+LButton::
+        send {CtrlDown}
+        MouseClick LEFT , , , , , D,
+        MouseClick LEFT , , , , , U,
+        send {CtrlUp}
+        return
+
     ;; print
     print1(){
         WinGetPos,X,Y,W,H,A

@@ -14,6 +14,44 @@ global NormalCopy := 0
 global LineSelectCopy :=1 
 
 ;;; misuji ;;;
+global xedge := 50
+global yedge := 50
+global cendiv := 2
+global wp_init_flag := 0
+global click
+global m1_middle := 1250
+global m2_middle := -1250
+global m1_l_half :=0
+global m1_r_half :=0
+global m2_l_half :=0
+global m2_r_half :=0
+
+global m1lX := 300
+global m1lY := 300
+global m1lW := 400
+global m1lH := 400
+global m1rX := 1300
+global m1rY := 1300
+global m1rW := 400
+global m1rH := 400
+global m1cX := 900
+global m1cY := 900
+global m1cW := 400
+global m1cH := 400
+
+global m2lX := -300
+global m2lY := 300
+global m2lW := 400
+global m2lH := 400
+global m2rX := -1300
+global m2rY := 1300
+global m2rW := 400
+global m2rH := 400
+global m2cX := -900
+global m2cY := 900
+global m2cW := 400
+global m2cH := 400
+
 global m1_sta_l := 0
 global m1_sta_r := 0
 global m1_sta_c := 0
@@ -150,116 +188,49 @@ F13 & Space:: send ^{Space}
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ;; initialize
     F1::
-        WinGetPos,X_def,,,,A
-        WinMaximize, A
+        CoordMode, Mouse, Screen ;; mouse absolute pos setting
+        MouseGetPos, Xmou, Ymou, winid
+        WinActivate, ahk_id %winid%
         WinGetPos,X,Y,W,H,A
-        if (X_def>0){
-            m1_moni_width := W
-            m1_moni_height := H
-            WinRestore, A
-            WinGetPos,X,Y,W,H,A
-            m1_x_l_def := X
-            m1_y_l_def := Y
-            m1_x_r_def := X + W
-            m1_y_r_def := Y
-            m1_ext_l := X - m1_Xedge_size
-            m1_ext_r := m1_moni_width - (X + W) - m1_Xedge_size
-            m1_sta_l := m1_sta_l_cls
-            m1_sta_r := m1_sta_r_cls
-            m1_sta_c := m1_sta_c_cls
-        }else if (X_def<0){
-            m2_moni_width := W
-            m2_moni_height := H
-            WinRestore, A
-            WinGetPos,X,Y,W,H,A
-            m2_x_l_def := X
-            m2_y_l_def := Y
-            m2_x_r_def := X + W
-            m2_y_r_def := Y
-            m2_ext_l := m2_moni_width + m2_x_l_def - m2_Xedge_size
-            m2_ext_r := -1 * m2_x_r_def - m2_Xedge_size
-            m2_sta_l := m2_sta_l_cls
-            m2_sta_r := m2_sta_r_cls
-            m2_sta_c := m2_sta_c_cls
-        }
+        m1_middle := X
         return
     
+    F2::
+        CoordMode, Mouse, Screen ;; mouse absolute pos setting
+        MouseGetPos, Xmou, Ymou, winid
+        WinActivate, ahk_id %winid%
+        WinGetPos,X,Y,W,H,A
+        m2_middle := X
+        return
+    
+    ^LButton::
+        get_moni()
+        click := 0
+        resize_toggle4()
+        return
+
+    ^RButton::
+        get_moni()
+        click := 1
+        resize_toggle4()
+        return
+
     MButton::
-        resize_toggle()
+        get_moni()
+        click := 2
+        resize_toggle4()
         return
 
     ;; test
     F3::
-        SysGet, moni, Monitor, 1
-        if (moniRight>10){
-            m1_moni_width := moniRight
-            m1_moni_height := moniBottom
-        }
-        if (moniLeft<-10){
-            m2_moni_width := moniLeft
-            m2_moni_height := moniBottom
-        }
-        SysGet, moni, Monitor, 2
-        if (moniRight>10){
-            m1_moni_width := moniRight
-            m1_moni_height := moniBottom
-        }
-        if (moniLeft<-10){
-            m2_moni_width := -1*moniLeft
-            m2_moni_height := moniBottom
-        }
-        CoordMode, Mouse, Screen ;; mouse absolute pos setting
-        MouseMove, m1_moni_width/2, m1_moni_height/2, 0
-        MouseGetPos, X, Y, winid
-        WinActivate, ahk_id %winid%
-        WinGetPos,X,Y,W,H,A
-        m1_x_div := X
-        MouseMove, -m2_moni_width/2, m2_moni_height/2, 0
-        MouseGetPos, X, Y, winid
-        WinActivate, ahk_id %winid%
-        WinGetPos,X,Y,W,H,A
-        m2_x_div := X
-        MsgBox, %m1_x_div% %m2_x_div%
-        return
-
-    ;; toggle window
-    F13 & LButton::
-        ; MsgBox, %m1_sta_max% %m2_sta_max%
-        CoordMode, Mouse, Screen ;; mouse absolute pos setting
-        MouseGetPos, X, Y
-        if ((X>0&&m1_sta_max==0)||(X<0&&m2_sta_max==0)){
-            if (X>0 && X<m1_ext_l){
-                MouseMove, m1_moni_width/2, Y, 0
-                MouseGetPos, Xc, Yc, winid
-                WinActivate, ahk_id %winid%
-                resize_toggle_l()
-                MouseMove, X, Y, 0
-            }else if (X>m1_x_r_def && X<m1_moni_width){
-                MouseMove, m1_moni_width/2, Y, 0
-                MouseGetPos, Xc, Yc, winid
-                WinActivate, ahk_id %winid%
-                resize_toggle_r()
-                MouseMove, X, Y, 0            
-            }else if (X>-m2_moni_width && X<m2_x_l_def){
-                MouseMove, -m2_moni_width/2, Y, 0
-                MouseGetPos, Xc, Yc, winid
-                WinActivate, ahk_id %winid%
-                resize_toggle_l()
-                MouseMove, X, Y, 0
-            }else if (X>m2_x_r_def && X<0){
-                MouseMove, -m2_moni_width/2, Y, 0
-                MouseGetPos, Xc, Yc, winid
-                WinActivate, ahk_id %winid%
-                resize_toggle_r()
-                MouseMove, X, Y, 0            
-            }
-        }
         return
     
-    ;; toggle window maxmin
-    F13 & RButton::
-        resize_toggle_minmax()
-        return
+    F13 & LButton::
+        send {CtrlDown}
+        MouseClick LEFT , , , , , D,
+        MouseClick LEFT , , , , , U,
+        send {CtrlUp}
+        return 
     
     ;; alternative ctrl click
     ^+LButton::
@@ -469,19 +440,187 @@ F13 & Space:: send ^{Space}
             }
         }
     }
+
+    resize_toggle3(){
+        CoordMode, Mouse, Screen ;; mouse absolute pos setting
+        MouseGetPos, Xmou, Ymou, winid
+        WinActivate, ahk_id %winid%
+        WinGetPos,X,Y,W,H,A
+        if (Xmou>0){
+            if (W>m1_moni_width-xedge-100){
+                if (X>xedge/2) {
+                    ;; close right
+                    resizewin(m1_x_div, Y, m1_moni_width-m1_x_div, H)
+                }else{
+                    ;; close left
+                    resizewin(X, Y, m1_x_div, H)
+                }
+            }else{
+                if (X>xedge){
+                    ;; open right
+                    resizewin(xedge, Y, m1_moni_width-xedge, H)
+                    m1_x_div := X
+                }else{
+                    ;; open left
+                    resizewin(X, Y, m1_moni_width-xedge, H)
+                    m1_x_div := W
+                }
+            }
+        }else {
+            if (W>m2_moni_width-xedge-100){
+                if (X>-m2_moni_width+xedge/2) {
+                    ;; close right
+                    resizewin(m2_x_div, Y, -m2_x_div, H)
+                }else{
+                    ;; close left
+                    resizewin(X, Y,m2_moni_width+m2_x_div, H)
+                }
+            }else{
+                if (X>-m2_moni_width+xedge){
+                    ;; open right
+                    resizewin(-m2_moni_width+xedge, Y, m2_moni_width-xedge, H)
+                    m2_x_div := X
+                }else{
+                    ;; open left
+                    resizewin(X, Y, m2_moni_width-xedge, H)
+                    m2_x_div := X+W
+                }
+            }
+        }
+    }
+
+    resize_toggle4(){
+        CoordMode, Mouse, Screen ;; mouse absolute pos setting
+        MouseGetPos, Xmou, Ymou, winid
+        WinActivate, ahk_id %winid%
+        WinGetPos,X,Y,W,H,A
+        if (Xmou>0){
+            if (W>m1_moni_width-xedge*2-100){
+                ;;close center
+                resizewin(m1cX, m1cY, m1cW, m1cH)
+            }else if (H>m1_moni_height-yedge*2-100){
+                if (click==2){
+                    ;; open center
+                    resizewin(xedge, yedge, m1_moni_width - xedge*2 - 20, m1_moni_height-yedge*2)
+                    m1cX := X 
+                    m1cY := Y
+                    m1cW := W
+                    m1cH := H
+                }else if (Xmou<m1_middle) {
+                    ;; close left
+                    resizewin(m1lX, m1lY, m1lW, m1lH)
+                    m1_l_half := 0
+                }else{
+                    ;; close right
+                    resizewin(m1rX, m1rY, m1rW, m1rH)
+                    m1_r_half := 0
+                }
+            }else{
+                if (click==0 && m1_l_half==0){
+                    ;; open left
+                    resizewin(0, yedge, m1_middle, m1_moni_height-yedge*2)
+                    m1_l_half := 1
+                    m1lX := X 
+                    m1lY := Y
+                    m1lW := W
+                    m1lH := H
+                }else if(click==1 && m1_r_half==0){
+                    ;; open right
+                    resizewin(m1_middle, yedge, m1_moni_width - m1_middle, m1_moni_height-yedge*2)
+                    m1_r_half := 1
+                    m1rX := X 
+                    m1rY := Y
+                    m1rW := W
+                    m1rH := H
+                }else if(click==2){
+                    ;; open center
+                    resizewin(xedge, yedge, m1_moni_width - xedge*2 - 20, m1_moni_height-yedge*2)
+                    m1cX := X 
+                    m1cY := Y
+                    m1cW := W
+                    m1cH := H
+                }
+            }
+        }else {
+            if (W>m2_moni_width-xedge*2-100){
+                ;;close center
+                resizewin(m2cX, m2cY, m2cW, m2cH)
+            }else if (H>m2_moni_height-yedge*2-100){
+                if (click==2){
+                    ;; open center
+                    resizewin(-m2_moni_width+xedge, yedge, m2_moni_width - xedge*2 - 20, m2_moni_height-yedge*2)
+                    m2cX := X 
+                    m2cY := Y
+                    m2cW := W
+                    m2cH := H
+                }else if (Xmou<m2_middle) {
+                    ;; close left
+                    resizewin(m2lX, m2lY, m2lW, m2lH)
+                    m2_l_half := 0
+                }else{
+                    ;; close right
+                    resizewin(m2rX, m2rY, m2rW, m2rH)
+                    m2_r_half := 0
+                }
+            }else{
+                if (click==0 && m2_l_half==0){
+                    ;; open left
+                    resizewin(-m2_moni_width, yedge, m2_moni_width+m2_middle, m2_moni_height-yedge*2)
+                    ; resizeWin(-1000, 100, 1000, 1000)
+                    m2_l_half := 1
+                    m2lX := X 
+                    m2lY := Y
+                    m2lW := W
+                    m2lH := H
+                }else if(click==1 && m2_r_half==0){
+                    ;; open right
+                    resizewin(m2_middle, yedge, -m2_middle, m2_moni_height-yedge*2)
+                    m2_r_half := 1
+                    m2rX := X 
+                    m2rY := Y
+                    m2rW := W
+                    m2rH := H
+                }else if(click==2){
+                    ;; open center
+                    resizewin(-m2_moni_width+xedge, yedge, m2_moni_width - xedge*2 - 20, m2_moni_height-yedge*2)
+                    m2cX := X 
+                    m2cY := Y
+                    m2cW := W
+                    m2cH := H
+                }
+            }
+        }
+    }
+
+    get_moni(){
+        if (wp_init_flag==0){
+            SysGet, moni, Monitor, 1
+            if (moniRight>10){
+                m1_moni_width := moniRight
+                m1_moni_height := moniBottom
+            }
+            if (moniLeft<-10){
+                m2_moni_width := moniLeft
+                m2_moni_height := moniBottom
+            }
+            SysGet, moni, Monitor, 2
+            if (moniRight>10){
+                m1_moni_width := moniRight
+                m1_moni_height := moniBottom
+            }
+            if (moniLeft<-10){
+                m2_moni_width := -1*moniLeft
+                m2_moni_height := moniBottom
+            }      
+            wp_init_flag := 1
+        }        
+    }
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Onenote ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 global onenote_mode := 0
 #IfWinActive,ahk_exe ONENOTE.EXE
-    RButton::
-        send !1
-        return
-    +RButton::
-        MouseClick Right , , , , , D,
-        MouseClick Right , , , , , U,
-        return
     WheelUp::
         send ^{WheelUp}
         return
@@ -501,16 +640,6 @@ global onenote_mode := 0
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #IfWinActive,ahk_exe Miro.exe
-    F13 & t::
-        send t
-        MouseClick LEFT , , , , , D,
-        MouseClick LEFT , , , , , U,
-        return
-    MButton::
-        send t
-        MouseClick LEFT , , , , , D,
-        MouseClick LEFT , , , , , U,
-        return
     ;; Double Click as create new TEXT
     LButton::
         If (A_PriorHotKey == A_ThisHotKey and A_TimeSincePriorHotkey < 300){

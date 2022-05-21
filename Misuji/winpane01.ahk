@@ -6,7 +6,7 @@ global winpane_on := 1
 
 ;;; winpane ;;;
 global xedge := 20
-global yedge := 20
+global yedge := 50
 global cendiv := 2
 global wp_init_flag := 0
 global click
@@ -274,11 +274,6 @@ F13 & Space:: send ^{Space}
                 Ymou_diff := Ymou - Ymou_pre
                 Xmou_hold := Xmou_hold + Xmou_diff
                 Ymou_hold := Ymou_hold + Ymou_diff
-                if (Xmou_hold<10 && Xmou_hold>-10 && LButton_count==3){
-                    get_moni()
-                    click := 2
-                    resize_toggle4()
-                }
                 Xmou_pre := Xmou
                 Ymou_pre := Ymou
                 WinGetPos,X,Y,W,H,A
@@ -479,6 +474,133 @@ F13 & Space:: send ^{Space}
         MouseGetPos, Xmou, Ymou, winid
         WinActivate, ahk_id %winid%
         WinGetPos,X,Y,W,H,A
+        if (Xmou>0){
+            if (W>m1_moni_width-xedge*2-100){
+                ;;close center
+                resizewin(m1cX, m1cY, m1cW, m1cH)
+                m1_c_opn := 0
+            }else if (H>m1_moni_height-yedge*2-100){
+                if (click==2){
+                    if (m1_c_opn==0){
+                        ;; open center
+                        resizewin(xedge, yedge, m1_moni_width - xedge*2 - 20, m1_moni_height-yedge*2)
+                        m1_c_opn := 1
+                        m1cX := X 
+                        m1cY := Y
+                        m1cW := W
+                        m1cH := H
+                    }
+                }else if (Xmou<m1_middle) {
+                    ;; close left
+                    resizewin(m1lX, m1lY, m1lW, m1lH)
+                    m1_middle := X+W
+                    m1_l_half := 0
+                }else{
+                    ;; close right
+                    resizewin(m1rX, m1rY, m1rW, m1rH)
+                    m1_middle := X
+                    m1_r_half := 0
+                }
+            }else{
+                if (click==0){
+                    if (m1_l_half==0){
+                        ;; open left
+                        resizewin(0, yedge, m1_middle, m1_moni_height-yedge*2)
+                        m1_l_half := 1
+                        m1lX := X 
+                        m1lY := Y
+                        m1lW := W
+                        m1lH := H
+                    }
+                }else if(click==1){
+                    if (m1_r_half==0){
+                        ;; open right
+                        resizewin(m1_middle, yedge, m1_moni_width - m1_middle, m1_moni_height-yedge*2)
+                        m1_r_half := 1
+                        m1rX := X 
+                        m1rY := Y
+                        m1rW := W
+                        m1rH := H
+                    }
+                }else if(click==2){
+                    if (m1_c_opn==0){
+                        ;; open center
+                        resizewin(xedge, yedge, m1_moni_width - xedge*2, m1_moni_height-yedge*2)
+                        m1_c_opn := 1
+                        m1cX := X 
+                        m1cY := Y
+                        m1cW := W
+                        m1cH := H
+                    }
+                }
+            }
+        }else {
+            if (W>m2_moni_width-xedge*2-100){
+                ;;close center
+                resizewin(m2cX, m2cY, m2cW, m2cH)
+                m2_c_opn := 0
+            }else if (H>m2_moni_height-yedge*2-100){
+                if (click==2){
+                    if (m2_c_opn==0){
+                        ;; open center
+                        resizewin(-m2_moni_width+xedge, yedge, m2_moni_width - xedge*2 - 20, m2_moni_height-yedge*2)
+                        m2cX := X 
+                        m2cY := Y
+                        m2cW := W
+                        m2cH := H
+                    }
+                }else if (Xmou<m2_middle) {
+                    ;; close left
+                    resizewin(m2lX, m2lY, m2lW, m2lH)
+                    m2_middle := X+W
+                    m2_l_half := 0
+                }else{
+                    ;; close right
+                    resizewin(m2rX, m2rY, m2rW, m2rH)
+                    m2_middle := X
+                    m2_r_half := 0
+                }
+            }else{
+                if (click==0){
+                    if (m2_l_half==0){
+                        ;; open left
+                        resizewin(-m2_moni_width, yedge, m2_moni_width+m2_middle, m2_moni_height-yedge*2)
+                        ; resizeWin(-1000, 100, 1000, 1000)
+                        m2_l_half := 1
+                        m2lX := X 
+                        m2lY := Y
+                        m2lW := W
+                        m2lH := H
+                    }
+                }else if(click==1){
+                    if (m2_r_half==0){
+                        ;; open right
+                        resizewin(m2_middle, yedge, -m2_middle, m2_moni_height-yedge*2)
+                        m2_r_half := 1
+                        m2rX := X 
+                        m2rY := Y
+                        m2rW := W
+                        m2rH := H
+                    }
+                }else if(click==2){
+                    if (m2_c_opn==0){
+                        ;; open center
+                        resizewin(-m2_moni_width+xedge, yedge, m2_moni_width - xedge*2, m2_moni_height-yedge*2)
+                        m2cX := X 
+                        m2cY := Y
+                        m2cW := W
+                        m2cH := H
+                    }
+                }
+            }
+        }
+    }
+
+    resize_toggle5(){
+        ; CoordMode, Mouse, Screen ;; mouse absolute pos setting
+        ; MouseGetPos, Xmou, Ymou, winid
+        ; WinActivate, ahk_id %winid%
+        ; WinGetPos,X,Y,W,H,A
         if (Xmou>0){
             if (W>m1_moni_width-xedge*2-100){
                 ;;close center

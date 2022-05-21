@@ -1,20 +1,11 @@
-;; 2022/05/16
-;; misuji script ver1.0
+;; 2022/05/21 Taku Honda
 
 ;---spjlekcial move---
 ; 変数定義は一番最初で実行しないと、謎のエラーが起きる
-global mode := 0
-global NormalMode := 0
-global WinSelMode := 1 
-global CommandMode := 0
-global InsertMode := 1 
-global SelectMode := 2 
-global LineSelectMode := 3 
-global NormalCopy := 0 
-global LineSelectCopy :=1 
+global winpane_on := 1
 
-;;; misuji ;;;
-global xedge := 50
+;;; winpane ;;;
+global xedge := 20
 global yedge := 50
 global cendiv := 2
 global wp_init_flag := 0
@@ -68,8 +59,8 @@ global m1_ext_l
 global m1_ext_r
 global m1_moni_width
 global m1_moni_height
-global m1_Xedge_size := 100
-global m1_Yedge_size := 100
+global m1_Xedge_size := 20
+global m1_Yedge_size := 20
 global m1_x_l_def
 global m1_y_l_def
 global m1_x_r_def
@@ -91,8 +82,8 @@ global m2_ext_l
 global m2_ext_r
 global m2_moni_width
 global m2_moni_height
-global m2_Xedge_size := 100
-global m2_Yedge_size := 100
+global m2_Xedge_size := 20
+global m2_Yedge_size := 20
 global m2_x_l_def
 global m2_y_l_def
 global m2_x_r_def
@@ -186,67 +177,191 @@ F13 & Space:: send ^{Space}
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Misuji ;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; winpane ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;; initialize
-    F3::
-        CoordMode, Mouse, Screen ;; mouse absolute pos setting
-        MouseGetPos, Xmou, Ymou, winid
-        if (Xmou>0){
-            m1_middle := Xmou
-        }else {
-            m2_middle := Xmou
-        }
-        return
-    
-    F4::
+
+#If, winpane_on
+    LButton::
+        LButton_count := 0
+        Xmou_hold := 0
+        Ymou_hold := 0
         CoordMode, Mouse, Screen ;; mouse absolute pos setting
         MouseGetPos, Xmou, Ymou, winid
         WinActivate, ahk_id %winid%
         WinGetPos,X,Y,W,H,A
-        m2_middle := X
-        return
-
-    F13 & LButton::
-        Keywait, LButton, U
-        Keywait, LButton, D T0.1
+        Xmou_pre := Xmou
+        Ymou_pre := Ymou
+        xt := X+0*(W/3)
+        x1 := X+1*(W/3)
+        x2 := X+2*(W/3)
+        xb := X+3*(W/3)
+        yt := Y+0*(H/3)
+        y1 := Y+1*(H/3)
+        y2 := Y+2*(H/3)        
+        yb := Y+3*(H/3)
+        rsz_lt := 0
+        rsz_lm := 1
+        rsz_lb := 2
+        rsz_mt := 3
+        rsz_mm := 4
+        rsz_mb := 5
+        rsz_rt := 6
+        rsz_rm := 7
+        rsz_rb := 8
+        
+        if ((Xmou>xt && Xmou<x1)&&(Ymou>yt && Ymou<y1 )){
+            resize_type := rsz_lt
+            X_fix := X+W
+            Y_fix := Y+H
+            Xmou_edge := X - Xmou
+            Ymou_edge := Y - Ymou
+        }else if ((Xmou>xt && Xmou<x1)&&(Ymou>y1 && Ymou<y2 )){
+            resize_type := rsz_lm
+            X_fix := X+W
+            ; Y_fix := Y+H
+            Xmou_edge := X - Xmou
+            ; Ymou_edge := Y - Ymou
+        }else if ((Xmou>xt && Xmou<x1)&&(Ymou>y2 && Ymou<yb )){
+            resize_type := rsz_lb
+            X_fix := X+W
+            Y_fix := Y
+            Xmou_edge := X - Xmou
+            Ymou_edge := Y+H - Ymou
+        }else if ((Xmou>x1 && Xmou<x2)&&(Ymou>yt && Ymou<y1 )){
+            resize_type := rsz_mt
+            ; X_fix := X+W
+            Y_fix := Y+H
+            ; Xmou_edge := X - Xmou
+            Ymou_edge := Y - Ymou
+        }else if ((Xmou>x1 && Xmou<x2)&&(Ymou>y1 && Ymou<y2 )){
+            resize_type := rsz_mm
+            Xmou_edge := X - Xmou
+            Ymou_edge := Y - Ymou
+        }else if ((Xmou>x1 && Xmou<x2)&&(Ymou>y2 && Ymou<yb )){
+            resize_type := rsz_mb
+            ; X_fix := X
+            Y_fix := Y
+            ; Xmou_edge := X+W-Xmou
+            Ymou_edge := Y+H-Ymou
+        }else if ((Xmou>x2 && Xmou<xb)&&(Ymou>yt && Ymou<y1 )){
+            resize_type := rsz_rt
+            X_fix := X
+            Y_fix := Y+H            
+            Xmou_edge := X+W - Xmou
+            Ymou_edge := Y - Ymou            
+        }else if ((Xmou>x2 && Xmou<xb)&&(Ymou>y1 && Ymou<y2 )){
+            resize_type := rsz_rm
+            ; X_fix := X
+            ; Y_fix := Y+H            
+            Xmou_edge := X+W - Xmou
+            ; Ymou_edge := Y - Ymou            
+        }else if ((Xmou>x2 && Xmou<xb)&&(Ymou>y2 && Ymou<yb )){
+            resize_type := rsz_rb
+            X_fix := X
+            Y_fix := Y
+            Xmou_edge := X+W-Xmou
+            Ymou_edge := Y+H-Ymou
+        }
+        
+        Keywait, LButton, U T0.1
         if (ErrorLevel=1){
-            get_moni()
-            click := 2
-            resize_toggle4()            
+            Loop{
+                ; Sleep, 1
+                LButton_count := LButton_count + 1
+                CoordMode, Mouse, Screen ;; mouse absolute pos setting
+                MouseGetPos, Xmou, Ymou, winid
+                Xmou_diff := Xmou - Xmou_pre
+                Ymou_diff := Ymou - Ymou_pre
+                Xmou_hold := Xmou_hold + Xmou_diff
+                Ymou_hold := Ymou_hold + Ymou_diff
+                if (Xmou_hold<10 && Xmou_hold>-10 && LButton_count==3){
+
+                }
+                Xmou_pre := Xmou
+                Ymou_pre := Ymou
+                WinGetPos,X,Y,W,H,A
+                if (resize_type==rsz_lt){
+                    resizewin(Xmou+Xmou_edge, Ymou+Ymou_edge, X_fix-(Xmou+Xmou_edge), Y_fix-(Ymou+Ymou_edge))
+                }else if (resize_type==rsz_lm){
+                    resizewin(Xmou+Xmou_edge, Y, X_fix-(Xmou+Xmou_edge), H)
+                }else if (resize_type==rsz_lb){
+                    resizewin(Xmou+Xmou_edge, Y_fix, X_fix-(Xmou+Xmou_edge), Ymou+Ymou_edge-Y_fix)    
+                }else if (resize_type==rsz_rt){
+                    resizewin(X_fix, Ymou+Ymou_edge, Xmou+Xmou_edge-X_fix, Y_fix-(Ymou+Ymou_edge))
+                }else if (resize_type==rsz_rm){
+                    resizewin(X, Y, Xmou+Xmou_edge-X, H)
+                }else if (resize_type==rsz_rb){
+                    resizewin(X, Y, Xmou-X+Xmou_edge, Ymou-Y+Ymou_edge)
+                }else if (resize_type==rsz_mt){
+                    resizewin(X, Ymou+Ymou_edge, W, Y_fix-(Ymou+Ymou_edge))
+                }else if (resize_type==rsz_mb){
+                    resizewin(X, Y, W, Ymou-Y+Ymou_edge)
+                }else if (resize_type==rsz_mm){
+                    resizewin(Xmou + Xmou_edge, Ymou + Ymou_edge, W, H)
+                }
+                GetKeyState, state, LButton, P
+                If state = U			; The key has been released, so break out of the loop.
+                    Break
+            }
         }else{
-            get_moni()
-            click := 0
-            resize_toggle4()
+            MouseGetPos, Xmou, Ymou, winid
+            WinActivate, ahk_id %winid%
+            winpane_on := 0
         }
         return
 
-    F13 & RButton::
-        get_moni()
-        click := 1
-        resize_toggle4()
+    RButton::
+        CoordMode, Mouse, Screen ;; mouse absolute pos setting
+        MouseGetPos, Xmou, Ymou, winid
+        WinActivate, ahk_id %winid%
+        winpane_on := 0
+        return
+
+#IF
+
+    F1::
+        if (winpane_on==0){
+            winpane_on := 1
+        }else{
+            winpane_on := 0
+        }
         return
 
     ^LButton::
+        winpane_on := 1
+        CoordMode, Mouse, Screen ;; mouse absolute pos setting
+        MouseGetPos, Xmou, Ymou, winid
         Keywait, LButton, U
         Keywait, LButton, D T0.1
         if (ErrorLevel=1){
-            get_moni()
-            click := 2
-            resize_toggle4()            
+            if (Xmou>0){
+                if (Xmou<m1_middle){
+                    get_moni()
+                    click := 0
+                    resize_toggle4()
+                }else{
+                    get_moni()
+                    click := 1
+                    resize_toggle4()
+                }
+            }else{
+                if (Xmou<m2_middle){
+                    get_moni()
+                    click := 0
+                    resize_toggle4()
+                }else{
+                    get_moni()
+                    click := 1
+                    resize_toggle4()
+                }
+            }
         }else{
             get_moni()
-            click := 0
+            click := 2
             resize_toggle4()
         }
         return
 
-    ^RButton::
-        get_moni()
-        click := 1
-        resize_toggle4()
-        return
-    
     ;; alternative ctrl click
     ^+LButton::
         send {CtrlDown}
@@ -268,240 +383,6 @@ F13 & Space:: send ^{Space}
     ;; resize func
     resizewin(Xpos, Ypos, Width, Height){
         WinMove, A, , Xpos, Ypos, Width, Height
-    }
-
-    resize_toggle_l(){
-        WinGetPos,X,Y,W,H,A
-        if (X>0){
-            if (m1_sta_l==m1_sta_l_cls){
-                resizewin(X-m1_ext_l, Y, W+m1_ext_l, H)
-                m1_sta_l := m1_sta_l_opn
-            }else if (m1_sta_l==m1_sta_l_opn){
-                resizewin(X+m1_ext_l, Y, W-m1_ext_l, H)
-                m1_sta_l := m1_sta_l_cls
-            }
-            if (m1_sta_l==m1_sta_l_cls&&m1_sta_r==m1_sta_r_cls){
-                m1_sta_c := m1_sta_c_cls
-            }else if (m1_sta_l==m1_sta_l_opn&&m1_sta_r==m1_sta_r_opn){
-                m1_sta_c := m1_sta_c_opn
-            }
-        }else{
-            if (m2_sta_l==m2_sta_l_cls){
-                resizewin(X-m2_ext_l, Y, W+m2_ext_l, H)
-                m2_sta_l := m2_sta_l_opn
-            }else if (m2_sta_l==m2_sta_l_opn){
-                resizewin(X+m2_ext_l, Y, W-m2_ext_l, H)
-                m2_sta_l := m2_sta_l_cls
-            }
-            if (m2_sta_l==m2_sta_l_cls&&m2_sta_r==m2_sta_r_cls){
-                m2_sta_c := m2_sta_c_cls
-            }else if (m2_sta_l==m2_sta_l_opn&&m2_sta_r==m2_sta_r_opn){
-                m2_sta_c := m2_sta_c_opn
-            }
-        }
-    }
-
-    resize_toggle_r(){
-        WinGetPos,X,Y,W,H,A
-        if (X>0){
-            if (m1_sta_r==m1_sta_r_cls){
-                resizewin(X, Y, W+m1_ext_r, H)
-                m1_sta_r := m1_sta_r_opn
-            }else if (m1_sta_r==m1_sta_r_opn){
-                resizewin(X, Y, W-m1_ext_r, H)
-                m1_sta_r := m1_sta_r_cls
-            }
-            if (m1_sta_l==m1_sta_l_cls&&m1_sta_r==m1_sta_r_cls){
-                m1_sta_c := m1_sta_c_cls
-            }else if (m1_sta_l==m1_sta_l_opn&&m1_sta_r==m1_sta_r_opn){
-                m1_sta_c := m1_sta_c_opn
-            }
-        }else{
-            if (m2_sta_r==m2_sta_r_cls){
-                resizewin(X, Y, W+m2_ext_r, H)
-                m2_sta_r := m2_sta_r_opn
-            }else if (m2_sta_r==m2_sta_r_opn){
-                resizewin(X, Y, W-m2_ext_r, H)
-                m2_sta_r := m2_sta_r_cls
-            }
-            if (m2_sta_l==m2_sta_l_cls&&m2_sta_r==m2_sta_r_cls){
-                m2_sta_c := m2_sta_c_cls
-            }else if (m2_sta_l==m2_sta_l_opn&&m2_sta_r==m2_sta_r_opn){
-                m2_sta_c := m2_sta_c_opn
-            }
-        }
-    }
-
-    resize_toggle_c(){
-        WinGetPos,X,Y,W,H,A
-        if (X>0){
-            if (m1_sta_c==m1_sta_c_cls){
-                resizewin(m1_Xedge_size, Y, m1_moni_width-m1_Xedge_size*2, H)
-                m1_sta_c := m1_sta_c_opn
-                m1_sta_l := m1_sta_l_opn
-                m1_sta_r := m1_sta_r_opn
-            }else if (m1_sta_c==m1_sta_c_opn){
-                resizewin(m1_x_l_def, Y, m1_x_r_def - m1_x_l_def, H)
-                m1_sta_c := m1_sta_c_cls
-                m1_sta_l := m1_sta_l_cls
-                m1_sta_r := m1_sta_r_cls
-            }
-        }else{
-            if (m2_sta_c==m2_sta_c_cls){
-                resizewin(-m2_moni_width + m2_Xedge_size, Y, m2_moni_width-m2_Xedge_size*2, H)
-                m2_sta_c := m2_sta_c_opn
-                m2_sta_l := m2_sta_l_opn
-                m2_sta_r := m2_sta_r_opn
-            }else if (m2_sta_c==m2_sta_c_opn){
-                resizewin(m2_x_l_def, Y, m2_x_r_def - m2_x_l_def, H)
-                m2_sta_c := m2_sta_c_cls
-                m2_sta_l := m2_sta_l_cls
-                m2_sta_r := m2_sta_r_cls
-            }
-        }
-    }
-
-    resize_toggle_minmax(){
-        CoordMode, Mouse, Screen ;; mouse absolute pos setting
-        MouseGetPos,X,Y,winid
-        WinActivate, ahk_id %winid%
-        WinGet, max, MinMax, A
-        if (max==0){
-            WinMaximize, A
-            if (X>0){
-                m1_sta_max := 1
-            }else{
-                m2_sta_max := 1                
-            }
-        }else{
-            WinRestore, A
-            if (X>0){
-                m1_sta_max := 0
-            }else{
-                m2_sta_max := 0
-            }
-        }
-    }
-
-    resize_toggle(){
-        CoordMode, Mouse, Screen ;; mouse absolute pos setting
-        MouseGetPos, Xmou, Ymou, winid
-        WinActivate, ahk_id %winid%
-        WinGetPos,X,Y,W,H,A
-        ; MsgBox, %X% %Y% %H%
-        if (Xmou>0){
-            if (m1_sta_l==m1_sta_l_opn){
-                resizewin(X,Y,m1_x_div,H)
-                m1_sta_l := m1_sta_l_cls
-            }else if (m1_sta_r==m1_sta_r_opn){
-                resizewin(m1_x_div, Y, m1_moni_width-m1_x_div, H)
-                m1_sta_r := m1_sta_r_cls
-            }else{
-                if (Xmou>-100 && Xmou<m1_x_div){
-                    resizeWin(X,Y,m1_moni_width-X-m1_Xedge_size,H)
-                    m1_sta_l := m1_sta_l_opn
-                }else if (Xmou>m1_x_div){
-                    resizewin(m1_Xedge_size, Y, m1_moni_width-m1_Xedge_size, H)
-                    m1_sta_r := m1_sta_r_opn
-                }
-            }
-        }else{
-            if (m2_sta_l==m2_sta_l_opn){
-                resizewin(X,Y,m2_x_div,H)
-                m2_sta_l := m2_sta_l_cls
-            }else if (m2_sta_r==m2_sta_r_opn){
-                resizewin(m2_x_div, Y, m2_moni_width+m2_x_div, H)
-                m2_sta_r := m2_sta_r_cls
-            }else{
-                ;;ここまで書いた
-                if (Xmou>m2_moni_width && Xmou<m2_x_div){
-                    resizeWin(X,Y,m2_moni_width-X-m2_Xedge_size,H)
-                    m2_sta_l := m2_sta_l_opn
-                }else if (Xmou>m2_x_div){
-                    resizewin(m2_Xedge_size, Y, m2_moni_width-m2_Xedge_size, H)
-                    m2_sta_r := m2_sta_r_opn
-                }
-            }
-        }
-    }
-
-    resize_toggle_r2(){
-        WinGetPos,X,Y,W,H,A
-        if (X>0){
-            if (m1_sta_r==m1_sta_r_cls){
-                resizewin(X, Y, W+m1_ext_r, H)
-                m1_sta_r := m1_sta_r_opn
-            }else if (m1_sta_r==m1_sta_r_opn){
-                resizewin(X, Y, W-m1_ext_r, H)
-                m1_sta_r := m1_sta_r_cls
-            }
-            if (m1_sta_l==m1_sta_l_cls&&m1_sta_r==m1_sta_r_cls){
-                m1_sta_c := m1_sta_c_cls
-            }else if (m1_sta_l==m1_sta_l_opn&&m1_sta_r==m1_sta_r_opn){
-                m1_sta_c := m1_sta_c_opn
-            }
-        }else{
-            if (m2_sta_r==m2_sta_r_cls){
-                resizewin(X, Y, W+m2_ext_r, H)
-                m2_sta_r := m2_sta_r_opn
-            }else if (m2_sta_r==m2_sta_r_opn){
-                resizewin(X, Y, W-m2_ext_r, H)
-                m2_sta_r := m2_sta_r_cls
-            }
-            if (m2_sta_l==m2_sta_l_cls&&m2_sta_r==m2_sta_r_cls){
-                m2_sta_c := m2_sta_c_cls
-            }else if (m2_sta_l==m2_sta_l_opn&&m2_sta_r==m2_sta_r_opn){
-                m2_sta_c := m2_sta_c_opn
-            }
-        }
-    }
-
-    resize_toggle3(){
-        CoordMode, Mouse, Screen ;; mouse absolute pos setting
-        MouseGetPos, Xmou, Ymou, winid
-        WinActivate, ahk_id %winid%
-        WinGetPos,X,Y,W,H,A
-        if (Xmou>0){
-            if (W>m1_moni_width-xedge-100){
-                if (X>xedge/2) {
-                    ;; close right
-                    resizewin(m1_x_div, Y, m1_moni_width-m1_x_div, H)
-                }else{
-                    ;; close left
-                    resizewin(X, Y, m1_x_div, H)
-                }
-            }else{
-                if (X>xedge){
-                    ;; open right
-                    resizewin(xedge, Y, m1_moni_width-xedge, H)
-                    m1_x_div := X
-                }else{
-                    ;; open left
-                    resizewin(X, Y, m1_moni_width-xedge, H)
-                    m1_x_div := W
-                }
-            }
-        }else {
-            if (W>m2_moni_width-xedge-100){
-                if (X>-m2_moni_width+xedge/2) {
-                    ;; close right
-                    resizewin(m2_x_div, Y, -m2_x_div, H)
-                }else{
-                    ;; close left
-                    resizewin(X, Y,m2_moni_width+m2_x_div, H)
-                }
-            }else{
-                if (X>-m2_moni_width+xedge){
-                    ;; open right
-                    resizewin(-m2_moni_width+xedge, Y, m2_moni_width-xedge, H)
-                    m2_x_div := X
-                }else{
-                    ;; open left
-                    resizewin(X, Y, m2_moni_width-xedge, H)
-                    m2_x_div := X+W
-                }
-            }
-        }
     }
 
     resize_toggle4(){
@@ -528,10 +409,12 @@ F13 & Space:: send ^{Space}
                 }else if (Xmou<m1_middle) {
                     ;; close left
                     resizewin(m1lX, m1lY, m1lW, m1lH)
+                    m1_middle := X+W
                     m1_l_half := 0
                 }else{
                     ;; close right
                     resizewin(m1rX, m1rY, m1rW, m1rH)
+                    m1_middle := X
                     m1_r_half := 0
                 }
             }else{
@@ -558,7 +441,7 @@ F13 & Space:: send ^{Space}
                 }else if(click==2){
                     if (m1_c_opn==0){
                         ;; open center
-                        resizewin(xedge, yedge, m1_moni_width - xedge*2 - 20, m1_moni_height-yedge*2)
+                        resizewin(xedge, yedge, m1_moni_width - xedge*2, m1_moni_height-yedge*2)
                         m1_c_opn := 1
                         m1cX := X 
                         m1cY := Y
@@ -585,10 +468,12 @@ F13 & Space:: send ^{Space}
                 }else if (Xmou<m2_middle) {
                     ;; close left
                     resizewin(m2lX, m2lY, m2lW, m2lH)
+                    m2_middle := X+W
                     m2_l_half := 0
                 }else{
                     ;; close right
                     resizewin(m2rX, m2rY, m2rW, m2rH)
+                    m2_middle := X
                     m2_r_half := 0
                 }
             }else{
@@ -616,7 +501,7 @@ F13 & Space:: send ^{Space}
                 }else if(click==2){
                     if (m2_c_opn==0){
                         ;; open center
-                        resizewin(-m2_moni_width+xedge, yedge, m2_moni_width - xedge*2 - 20, m2_moni_height-yedge*2)
+                        resizewin(-m2_moni_width+xedge, yedge, m2_moni_width - xedge*2, m2_moni_height-yedge*2)
                         m2cX := X 
                         m2cY := Y
                         m2cW := W
@@ -652,19 +537,9 @@ F13 & Space:: send ^{Space}
     }
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Onenote ;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Miro ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 #IfWinActive,ahk_exe Miro.exe
-    F13 & t::
-        send t
-        MouseClick LEFT , , , , , D,
-        MouseClick LEFT , , , , , U,
-        return
-    MButton::
-        send t
-        MouseClick LEFT , , , , , D,
-        MouseClick LEFT , , , , , U,
-        return
     ;; Double Click as create new TEXT
     LButton::
         If (A_PriorHotKey == A_ThisHotKey and A_TimeSincePriorHotkey < 300){
@@ -680,7 +555,7 @@ F13 & Space:: send ^{Space}
 #IfWinActive
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Miro ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Onenote ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 #IfWinActive,ahk_exe Miro.exe
     ;; Double Click as create new TEXT

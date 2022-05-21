@@ -275,7 +275,9 @@ F13 & Space:: send ^{Space}
                 Xmou_hold := Xmou_hold + Xmou_diff
                 Ymou_hold := Ymou_hold + Ymou_diff
                 if (Xmou_hold<10 && Xmou_hold>-10 && LButton_count==3){
-
+                    get_moni()
+                    click := 2
+                    resize_toggle4()
                 }
                 Xmou_pre := Xmou
                 Ymou_pre := Ymou
@@ -306,12 +308,12 @@ F13 & Space:: send ^{Space}
         }else{
             MouseGetPos, Xmou, Ymou, winid
             WinActivate, ahk_id %winid%
-            winpane_on := 0
+            wp_off()
         }
         return
 
     RButton::
-        winpane_on := 1
+        wp_on()
         CoordMode, Mouse, Screen ;; mouse absolute pos setting
         MouseGetPos, Xmou, Ymou, winid
         WinActivate, ahk_id %winid%
@@ -356,7 +358,7 @@ F13 & Space:: send ^{Space}
         return
     
     ^+1::
-        winpane_on := 1
+        wp_on()
         return
     
     MButton::
@@ -364,13 +366,18 @@ F13 & Space:: send ^{Space}
         return
 
     ^LButton::
-        winpane_on := 1
+        wp_on()
         CoordMode, Mouse, Screen ;; mouse absolute pos setting
         MouseGetPos, Xmou, Ymou, winid
         WinActivate, ahk_id %winid%
-        Keywait, LButton, U
-        Keywait, LButton, D T0.1
+        Keywait, LButton, U T0.1
         if (ErrorLevel=1){
+            ;; hold
+            click
+            get_moni()
+            click := 2
+            resize_toggle4()
+        }else{
             if (Xmou>0){
                 if (Xmou<m1_middle){
                     get_moni()
@@ -392,15 +399,11 @@ F13 & Space:: send ^{Space}
                     resize_toggle4()
                 }
             }
-        }else{
-            get_moni()
-            click := 2
-            resize_toggle4()
         }
         return
 
     ^RButton::
-        winpane_on := 1
+        wp_on()
         CoordMode, Mouse, Screen ;; mouse absolute pos setting
         MouseGetPos, Xmou, Ymou, winid
         Keywait, LButton, U
@@ -450,6 +453,20 @@ F13 & Space:: send ^{Space}
         MsgBox, %m1_ext_l% %m1_ext_r%
         MsgBox, %m2_x_l_def% %m2_y_l_def% %m2_x_r_def% %m2_y_r_def%
         MsgBox, %m2_ext_l% %m2_ext_r%
+    }
+
+    wp_off(){
+        if (winpane_on==1){
+            send ^+2  
+            winpane_on := 0
+        }
+    }
+
+    wp_on(){
+        if (winpane_on==0){
+            send ^+2  
+            winpane_on := 1
+        }
     }
 
     ;; resize func

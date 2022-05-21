@@ -311,6 +311,38 @@ F13 & Space:: send ^{Space}
         return
 
     RButton::
+        winpane_on := 1
+        CoordMode, Mouse, Screen ;; mouse absolute pos setting
+        MouseGetPos, Xmou, Ymou, winid
+        WinActivate, ahk_id %winid%
+        Keywait, RButton, U T0.3
+        if (ErrorLevel=1){
+            get_moni()
+            click := 2
+            resize_toggle4()
+        }else{
+            if (Xmou>0){
+                if (Xmou<m1_middle){
+                    get_moni()
+                    click := 0
+                    resize_toggle4()
+                }else{
+                    get_moni()
+                    click := 1
+                    resize_toggle4()
+                }
+            }else{
+                if (Xmou<m2_middle){
+                    get_moni()
+                    click := 0
+                    resize_toggle4()
+                }else{
+                    get_moni()
+                    click := 1
+                    resize_toggle4()
+                }
+            }
+        }
         return
 
 #IF
@@ -321,6 +353,10 @@ F13 & Space:: send ^{Space}
         }else{
             winpane_on := 0
         }
+        return
+    
+    ^+1::
+        winpane_on := 1
         return
     
     MButton::

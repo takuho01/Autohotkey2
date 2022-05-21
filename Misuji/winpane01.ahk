@@ -322,6 +322,10 @@ F13 & Space:: send ^{Space}
             winpane_on := 0
         }
         return
+    
+    MButton::
+        winpane_on := 1
+        return
 
     ^LButton::
         winpane_on := 1

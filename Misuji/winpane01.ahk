@@ -6,7 +6,7 @@ global winpane_on := 1
 
 ;;; winpane ;;;
 global xedge := 20
-global yedge := 50
+global yedge := 20
 global cendiv := 2
 global wp_init_flag := 0
 global click
@@ -311,10 +311,6 @@ F13 & Space:: send ^{Space}
         return
 
     RButton::
-        CoordMode, Mouse, Screen ;; mouse absolute pos setting
-        MouseGetPos, Xmou, Ymou, winid
-        WinActivate, ahk_id %winid%
-        winpane_on := 0
         return
 
 #IF
@@ -328,6 +324,42 @@ F13 & Space:: send ^{Space}
         return
 
     ^LButton::
+        winpane_on := 1
+        CoordMode, Mouse, Screen ;; mouse absolute pos setting
+        MouseGetPos, Xmou, Ymou, winid
+        WinActivate, ahk_id %winid%
+        Keywait, LButton, U
+        Keywait, LButton, D T0.1
+        if (ErrorLevel=1){
+            if (Xmou>0){
+                if (Xmou<m1_middle){
+                    get_moni()
+                    click := 0
+                    resize_toggle4()
+                }else{
+                    get_moni()
+                    click := 1
+                    resize_toggle4()
+                }
+            }else{
+                if (Xmou<m2_middle){
+                    get_moni()
+                    click := 0
+                    resize_toggle4()
+                }else{
+                    get_moni()
+                    click := 1
+                    resize_toggle4()
+                }
+            }
+        }else{
+            get_moni()
+            click := 2
+            resize_toggle4()
+        }
+        return
+
+    ^RButton::
         winpane_on := 1
         CoordMode, Mouse, Screen ;; mouse absolute pos setting
         MouseGetPos, Xmou, Ymou, winid

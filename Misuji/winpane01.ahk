@@ -483,7 +483,8 @@ F13 & Space:: send ^{Space}
                 if (click==2){
                     if (m1_c_opn==0){
                         ;; open center
-                        resizewin(xedge, yedge, m1_moni_width - xedge*2 - 20, m1_moni_height-yedge*2)
+                        resizewin(xedge, yedge-20, m1_moni_width - xedge*2 - 20, m1_moni_height-yedge*2)
+                        wp_off()
                         m1_c_opn := 1
                         m1cX := X 
                         m1cY := Y
@@ -525,7 +526,8 @@ F13 & Space:: send ^{Space}
                 }else if(click==2){
                     if (m1_c_opn==0){
                         ;; open center
-                        resizewin(xedge, yedge, m1_moni_width - xedge*2, m1_moni_height-yedge*2)
+                        resizewin(xedge, yedge-20, m1_moni_width - xedge*2, m1_moni_height-yedge*2)
+                        wp_off()
                         m1_c_opn := 1
                         m1cX := X 
                         m1cY := Y
@@ -543,7 +545,8 @@ F13 & Space:: send ^{Space}
                 if (click==2){
                     if (m2_c_opn==0){
                         ;; open center
-                        resizewin(-m2_moni_width+xedge, yedge, m2_moni_width - xedge*2 - 20, m2_moni_height-yedge*2)
+                        resizewin(-m2_moni_width+xedge, yedge-20, m2_moni_width - xedge*2 - 20, m2_moni_height-yedge*2)
+                        wp_off()
                         m2cX := X 
                         m2cY := Y
                         m2cW := W
@@ -585,7 +588,8 @@ F13 & Space:: send ^{Space}
                 }else if(click==2){
                     if (m2_c_opn==0){
                         ;; open center
-                        resizewin(-m2_moni_width+xedge, yedge, m2_moni_width - xedge*2, m2_moni_height-yedge*2)
+                        resizewin(-m2_moni_width+xedge, yedge-20, m2_moni_width - xedge*2, m2_moni_height-yedge*2)
+                        wp_off()
                         m2cX := X 
                         m2cY := Y
                         m2cW := W

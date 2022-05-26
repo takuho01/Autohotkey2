@@ -99,6 +99,7 @@ global ev_mode := 0
 global normal_mode := 0
 global insert_mode := 1
 global visual_mode := 2
+global visual_line_mode := 3
 global space_mode := 4
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -190,9 +191,42 @@ F13 & Space:: send ^{Space}
 ;;; winpane ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#If, winpane_on
-    LButton::
-        LButton_count := 0
+#IF, winpane_on
+#IF
+
+    F1::
+        if (winpane_on==0){
+            winpane_on := 1
+        }else{
+            winpane_on := 0
+        }
+        return
+    
+    ^+1::
+        wp_on()
+        return
+
+    ^LButton::
+        wp_on()
+        CoordMode, Mouse, Screen ;; mouse absolute pos setting
+        MouseGetPos, Xmou, Ymou, winid
+        WinActivate, ahk_id %winid%
+        Keywait, LButton, U T0.1
+        if (ErrorLevel=1){
+            ;; hold
+            click
+            get_moni()
+            click := 2
+            resize_toggle4()
+        }else{
+            if (Xmou>0){
+                if (Xmou<m1_middle){
+                    get_moni()
+                    click := 0
+                    resize_toggle4()
+                }else{
+                    get_moni()
+                    click := 1
                     resize_toggle4()
                 }
             }else{
@@ -200,6 +234,8 @@ F13 & Space:: send ^{Space}
                     get_moni()
                     click := 0
                     resize_toggle4()
+                }else{
+                    get_moni()
                     click := 1
                     resize_toggle4()
                 }

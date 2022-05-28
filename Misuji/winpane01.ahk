@@ -747,6 +747,9 @@ F13 & Space:: send ^{Space}
 ;;; Excel ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 #IfWinActive,ahk_exe EXCEL.exe
+    F13 & c::
+        send {Enter}^c{Up}
+        return
     ; F13 & Enter::
     ;     send {F2}
     ;     return
@@ -773,76 +776,76 @@ F13 & Space:: send ^{Space}
 
 #IfWinActive
 
-#IF (ev_mode==0 && km_mode==1)
-    F13 & q::
-        MsgBox, 0
-        ev_mode := 1
-        return
-    F13 & c::
-        return
-    F13 & Enter::
-        send {F2}
-        change_insert_mode() 
-        return    
-    h::send {Left}
-    j::send {Down}
-    k::send {Up}
-    l::send {Right}
-    x::send {Delete}
-    i:: change_insert_mode()
+; #IF (ev_mode==0 && km_mode==1)
+;     F13 & q::
+;         MsgBox, 0
+;         ev_mode := 1
+;         return
+;     F13 & c::
+;         return
+;     F13 & Enter::
+;         send {F2}
+;         change_insert_mode() 
+;         return    
+;     h::send {Left}
+;     j::send {Down}
+;     k::send {Up}
+;     l::send {Right}
+;     x::send {Delete}
+;     i:: change_insert_mode()
 
-    a:: return
-    b:: return
-    c:: return
-    d:: return
-    e:: return
-    f:: return
-    g:: return
-    ; i:: return
-    ; j:: return
-    ; k:: return
-    ; l:: return
-    m:: return
-    n:: return
-    o:: return
-    p:: return
-    q:: return
-    r:: return
-    s:: return
-    t:: return
-    u:: return
-    v:: return
-    w:: return
-    ; x:: return
-    y:: return
-    z:: return
-#IF
+;     a:: return
+;     b:: return
+;     c:: return
+;     d:: return
+;     e:: return
+;     f:: return
+;     g:: return
+;     ; i:: return
+;     ; j:: return
+;     ; k:: return
+;     ; l:: return
+;     m:: return
+;     n:: return
+;     o:: return
+;     p:: return
+;     q:: return
+;     r:: return
+;     s:: return
+;     t:: return
+;     u:: return
+;     v:: return
+;     w:: return
+;     ; x:: return
+;     y:: return
+;     z:: return
+; #IF
 
-#IF (ev_mode==1 && km_mode==1)
-    F13 & q::
-        MsgBox, 1
-        ev_mode := 0
-        return
-    F13 & c::change_normal_mode()
-#IF
+; #IF (ev_mode==1 && km_mode==1)
+;     F13 & q::
+;         MsgBox, 1
+;         ev_mode := 0
+;         return
+;     F13 & c::change_normal_mode()
+; #IF
 
 
 
-change_normal_mode(){
-    if (ev_mode==1){
-        send {Enter}{Up}
-    }
-    ev_mode := 0
-}
-change_insert_mode(){
-    ev_mode := 1
-}
-change_visual_mode(){
-    ev_mode := 2
-}
-change_visual_line_mode(){
-    ev_mode := 3
-}
-change_space_mode(){
-    ev_mode := 4
-}
+; change_normal_mode(){
+;     if (ev_mode==1){
+;         send {Enter}{Up}
+;     }
+;     ev_mode := 0
+; }
+; change_insert_mode(){
+;     ev_mode := 1
+; }
+; change_visual_mode(){
+;     ev_mode := 2
+; }
+; change_visual_line_mode(){
+;     ev_mode := 3
+; }
+; change_space_mode(){
+;     ev_mode := 4
+; }

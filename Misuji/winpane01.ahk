@@ -137,8 +137,8 @@ global space_cnt := 0
     F13 & b::send {Blind}^b
     ; F13 & n::send {Blind}^n
     F13 & m::send {Blind}^m
-    ; F13 & 1::send {Blind}^1
-    ; F13 & 2::send {Blind}^2
+    F13 & 1::send {Blind}^1
+    F13 & 2::send {Blind}^2
     F13 & 3::send {Blind}^3
     F13 & 4::send {Blind}^4
     F13 & 5::send {Blind}^5
@@ -153,7 +153,7 @@ global space_cnt := 0
     F13 & Tab::send {Blind}^{Tab}
     F13 & [::send {Blind}^[
     F13 & ]::send {Blind}^]
-    ; F13 & Space::send {Blind}^{Space}
+    F13 & Space::send {Blind}^{Space}
     F13 & Enter::send {Blind}^{Enter}
 
 
@@ -190,7 +190,6 @@ global space_cnt := 0
     F13 & Right::Send {Blind}{End}
 
     ;---other---
-    F13 & Space:: send ^{Space}
     F12::
         CoordMode, Mouse, Screen ;; mouse absolute pos setting
         MouseGetPos, Xmou, Ymou, winid
@@ -201,22 +200,6 @@ global space_cnt := 0
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; winpane ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-    #IF, winpane_on
-    #IF
-
-        F1::
-            if (winpane_on==0){
-                winpane_on := 1
-            }else{
-                winpane_on := 0
-            }
-            return
-        
-        ^+1::
-            wp_on()
-            return
-
         ^RButton::
             wp_on()
             CoordMode, Mouse, Screen ;; mouse absolute pos setting
@@ -926,12 +909,22 @@ global space_cnt := 0
         space::
             space_cnt := space_cnt + 1
             return
+        Enter::
+            if (space_cnt==0){
+                send {Down}
+                send +{Space}
+                send ^+=
+                send {Up}{Down}
+                space_cnt := 0
+                change_normal_mode()                
+            }
+            return
         h::
             if (space_cnt==0){
                 send {Blind}{End}{Left}
                 space_cnt := 0
                 change_normal_mode()
-            }else if(space_cnt==1){
+            }else if (space_cnt==1){
                 send ^{PgUp}
             }
             return
@@ -954,7 +947,7 @@ global space_cnt := 0
                 send {Blind}{End}{Right}
                 space_cnt := 0
                 change_normal_mode()
-            }else if(space_cnt==1){
+            }else if (space_cnt==1){
                 send ^{PgDn}
             }
             return

@@ -105,6 +105,8 @@ global insert_mode := 1
 global visual_mode := 2
 global visual_line_mode := 3
 global space_mode := 4
+global visual_line_cp := 0
+global space_cnt := 0
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; reset key ;;;;;;;;;;;;;;;;;;;;;;;
@@ -800,13 +802,18 @@ global space_mode := 4
         F13 & Down::Send  {Blind}{End}{Down}
         F13 & Left::Send  {Blind}{End}{Left}
         F13 & Right::Send {Blind}{End}{Right}
-        ^Up::Send     ^x{Down}{Up}{Up}^v
-        ^Down::Send   ^x{Down}{Up}{Down}^v
-        ^Left::Send   ^x{Down}{Up}{Left}^v
-        ^Right::Send  ^x{Down}{Up}{Right}^v
+        ; ^Up::Send     ^x{Down}{Up}{Up}^v
+        ; ^Down::Send   ^x{Down}{Up}{Down}^v
+        ; ^Left::Send   ^x{Down}{Up}{Left}^v
+        ; ^Right::Send  ^x{Down}{Up}{Right}^v
         F13 & c::
             if (km_mode==1){
-                change_normal_mode()
+                if (ev_mode==0){
+                    send {Esc}
+                    change_normal_mode()
+                }else{
+                    change_normal_mode()
+                }
             }else {
                 send ^c
             }
@@ -837,11 +844,46 @@ global space_mode := 4
         k::send {Up}
         l::send {Right}
         x::send {Delete}
-        y::send ^c
-        p::send ^v
+        d::send +{space}^-
+        y::
+            keywait, y, U
+            keywait, y, D T0.2
+            if (ErrorLevel=1){
+                ; single
+                send ^c
+                visual_line_cp := 0
+            }else {
+                ; double
+                send +{Space}
+                send ^c
+                visual_line_cp := 1
+            }            
+            return
+        p::
+            if (visual_line_cp==0){
+                send ^v
+                send ^c
+            }else {
+                send {Down}
+                send +{Space}
+                send ^+=
+                send ^c
+            }            
+            return
         u::send ^z
         F13 & r::send ^y
         i:: change_insert_mode()
+        v:: change_visual_mode()
+        +v:: 
+            send +{Space}
+            change_visual_line_mode()
+            return
+        F13 & c::
+            send {Esc}
+            MsgBox, hoget
+            visual_line_cp := 0
+            return
+        space::change_space_mode()
     #IF
 
     #IF (ev_mode==1 && km_mode==1)
@@ -852,12 +894,77 @@ global space_mode := 4
         F13 & c::change_normal_mode()
     #IF
 
+    #IF (ev_mode==2 && km_mode==1)
+        F13 & c::change_normal_mode()
+        h::send +{Left}
+        j::send +{Down}
+        k::send +{Up}
+        l::send +{Right}
+        d::send ^-
+        y::
+            send ^c
+            change_normal_mode()
+            return
+    #IF
 
+    #IF (ev_mode==3 && km_mode==1)
+        F13 & c::change_normal_mode()
+        h::send +{Left}
+        j::send +{Down}
+        k::send +{Up}
+        l::send +{Right}
+        d::send ^-
+        y::
+            send ^c
+            visual_line_cp := 1
+            change_normal_mode()
+            return
+    #IF
+
+    #IF (ev_mode==4 && km_mode==1)
+        F13 & c::change_normal_mode()
+        space::
+            space_cnt := space_cnt + 1
+            return
+        h::
+            if (space_cnt==0){
+                send {Blind}{End}{Left}
+                space_cnt := 0
+                change_normal_mode()
+            }else if(space_cnt==1){
+                send ^{PgUp}
+            }
+            return
+        j::
+            if (space_cnt==0){
+                send {Blind}{End}{Down}
+                space_cnt := 0
+                change_normal_mode()
+            }
+            return
+        k::
+            if (space_cnt==0){
+                send {Blind}{End}{Up}
+                space_cnt := 0
+                change_normal_mode()
+            }
+            return
+        l::
+            if (space_cnt==0){
+                send {Blind}{End}{Right}
+                space_cnt := 0
+                change_normal_mode()
+            }else if(space_cnt==1){
+                send ^{PgDn}
+            }
+            return
+    #IF
 
     change_normal_mode(){
         if (ev_mode==1){
             send {Enter}{Up}
         }
+        space_cnt := 0
         ev_mode := 0
     }
     change_insert_mode(){

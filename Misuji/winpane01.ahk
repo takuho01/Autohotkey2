@@ -97,6 +97,7 @@ global km_x := 600
 global km_y := 300
 global km_w := 1200
 global km_h := 800
+global km2_mode := 0
 
 ;;; excel vim ;;;
 global ev_mode := 0
@@ -107,6 +108,7 @@ global visual_line_mode := 3
 global space_mode := 4
 global visual_line_cp := 0
 global space_cnt := 0
+global Enter_cnt := 0
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; reset key ;;;;;;;;;;;;;;;;;;;;;;;
@@ -215,8 +217,6 @@ global space_cnt := 0
                 ; mid_resize := 1
             }
             return
-
-
 
         ^LButton::
             LButton_count := 0
@@ -703,6 +703,11 @@ global space_cnt := 0
             ; WinMove, ahk_pid %km_pid%, ,600, 300, 1200, 800
             WinRestore, keepmemo
             WinActivate, keepmemo
+            WinGetPos,X,Y,W,H,A  
+            km_x :=X
+            km_y :=Y
+            km_w :=W
+            km_h :=H
             ; WinMove, keepmemo, ,600, 300, 1200, 800
             km_mode := 1
         }else {
@@ -718,7 +723,33 @@ global space_cnt := 0
         }
         return
 
-
+    F13 & o::
+        if (km2_mode==0){
+            WinRestore, ahk_exe Obsidian.exe
+            WinActivate, ahk_exe Obsidian.exe
+            WinGetPos,X,Y,W,H,A  
+            km_x :=X
+            km_y :=Y
+            km_w :=W
+            km_h :=H
+            if (km_mode==1){
+                km_mode := 0 
+            }
+            km2_mode := 1
+        }else {
+            WinActivate, ahk_exe Obsidian.exe
+            WinGetPos,X,Y,W,H,A  
+            WinMinimize, ahk_exe Obsidian.exe
+            km_x :=X
+            km_y :=Y
+            km_w :=W
+            km_h :=H
+            if (km_mode==1){
+                km_mode := 0 
+            }
+            km2_mode := 0
+        }
+        return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Miro ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -792,7 +823,8 @@ global space_cnt := 0
         F13 & c::
             if (km_mode==1){
                 if (ev_mode==0){
-                    send {Esc}
+                    send {Esc}{Up}{Down}
+                    visual_line_cp := 0
                     change_normal_mode()
                 }else{
                     change_normal_mode()
@@ -803,7 +835,7 @@ global space_cnt := 0
             return
     #IfWinActive
 
-    #IF (ev_mode==0 && km_mode==1)
+    #IF (ev_mode==normal_mode && km_mode==1)
         LButton::
             CoordMode, Mouse, Screen ;; mouse absolute pos setting
             MouseGetPos, Xmou, Ymou, winid
@@ -830,7 +862,7 @@ global space_cnt := 0
         d::send +{space}^-
         y::
             keywait, y, U
-            keywait, y, D T0.2
+            keywait, y, D T0.05
             if (ErrorLevel=1){
                 ; single
                 send ^c
@@ -861,15 +893,10 @@ global space_cnt := 0
             send +{Space}
             change_visual_line_mode()
             return
-        F13 & c::
-            send {Esc}
-            MsgBox, hoget
-            visual_line_cp := 0
-            return
         space::change_space_mode()
     #IF
 
-    #IF (ev_mode==1 && km_mode==1)
+    #IF (ev_mode==insert_mode && km_mode==1)
         F13 & q::
             MsgBox, 1
             ev_mode := 0
@@ -877,26 +904,44 @@ global space_cnt := 0
         F13 & c::change_normal_mode()
     #IF
 
-    #IF (ev_mode==2 && km_mode==1)
+    #IF (ev_mode==visual_mode && km_mode==1)
         F13 & c::change_normal_mode()
         h::send +{Left}
         j::send +{Down}
         k::send +{Up}
         l::send +{Right}
-        d::send ^-
+        x::send {Delete}
+        p::
+            send ^v
+            send ^c
+            return
+        d::
+            send ^-
+            send u{Enter}
+            change_normal_mode()
+            return
         y::
             send ^c
             change_normal_mode()
             return
+        space::
+            space_cnt := 3
+            change_space_mode()
+            return
     #IF
 
-    #IF (ev_mode==3 && km_mode==1)
+    #IF (ev_mode==visual_line_mode && km_mode==1)
         F13 & c::change_normal_mode()
         h::send +{Left}
         j::send +{Down}
         k::send +{Up}
         l::send +{Right}
-        d::send ^-
+        x::send {Delete}
+        d::
+            send ^-
+            send {Up}{Down}
+            change_normal_mode()
+            return
         y::
             send ^c
             visual_line_cp := 1
@@ -904,7 +949,7 @@ global space_cnt := 0
             return
     #IF
 
-    #IF (ev_mode==4 && km_mode==1)
+    #IF (ev_mode==space_mode && km_mode==1)
         F13 & c::change_normal_mode()
         space::
             space_cnt := space_cnt + 1
@@ -917,6 +962,20 @@ global space_cnt := 0
                 send {Up}{Down}
                 space_cnt := 0
                 change_normal_mode()                
+            }else if (space_cnt==1){
+                if (Enter_cnt==0){
+                    send +{Left}
+                }
+                send ^+=
+                send D
+                send {Enter}
+                Enter_cnt := 1
+            }else if (space_cnt==3){
+                send ^+=
+                send D
+                send {Enter}
+                space_cnt := 0
+                change_visual_mode()
             }
             return
         h::
@@ -957,7 +1016,9 @@ global space_cnt := 0
         if (ev_mode==1){
             send {Enter}{Up}
         }
+        send {Down}{Up}
         space_cnt := 0
+        Enter_cnt := 0
         ev_mode := 0
     }
     change_insert_mode(){

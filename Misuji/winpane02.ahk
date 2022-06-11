@@ -26,11 +26,11 @@ global m1_c_buf_x := 0.4
 global m1_c_buf_y := 0.4
 global m1_c_buf_w := 0.3
 global m1_c_buf_h := 0.4
-global m1_l_buf_x := 0.4
+global m1_l_buf_x := 0.2
 global m1_l_buf_y := 0.4
 global m1_l_buf_w := 0.3
 global m1_l_buf_h := 0.4
-global m1_r_buf_x := 0.4
+global m1_r_buf_x := 0.6
 global m1_r_buf_y := 0.4
 global m1_r_buf_w := 0.3
 global m1_r_buf_h := 0.4
@@ -44,11 +44,11 @@ global m2_c_buf_x := 0.4
 global m2_c_buf_y := 0.4
 global m2_c_buf_w := 0.3
 global m2_c_buf_h := 0.4
-global m2_l_buf_x := 0.4
+global m2_l_buf_x := 0.2
 global m2_l_buf_y := 0.4
 global m2_l_buf_w := 0.3
 global m2_l_buf_h := 0.4
-global m2_r_buf_x := 0.4
+global m2_r_buf_x := 0.6
 global m2_r_buf_y := 0.4
 global m2_r_buf_w := 0.3
 global m2_r_buf_h := 0.4
@@ -62,11 +62,11 @@ global m3_c_buf_x := 0.4
 global m3_c_buf_y := 0.4
 global m3_c_buf_w := 0.3
 global m3_c_buf_h := 0.4
-global m3_l_buf_x := 0.4
+global m3_l_buf_x := 0.2
 global m3_l_buf_y := 0.4
 global m3_l_buf_w := 0.3
 global m3_l_buf_h := 0.4
-global m3_r_buf_x := 0.4
+global m3_r_buf_x := 0.6
 global m3_r_buf_y := 0.4
 global m3_r_buf_w := 0.3
 global m3_r_buf_h := 0.4
@@ -162,10 +162,10 @@ global Enter_cnt := 0
     ; F13 & L::send {Blind}{Right}
     ; F13 & I::send {Blind}{Home}
     ; F13 & O::send {Blind}{End}
-    F13 & K::send {Blind}{Down}
-    F13 & J::send {Blind}{Left}
-    F13 & L::send {Blind}{Right}
-    F13 & I::send {Blind}{Up}
+    ; F13 & K::send {Blind}{Down}
+    ; F13 & J::send {Blind}{Left}
+    ; F13 & L::send {Blind}{Right}
+    ; F13 & I::send {Blind}{Up}
 
     F13 & Up::Send    {Blind}{PgUp}
     F13 & Down::Send  {Blind}{PgDn}
@@ -173,11 +173,6 @@ global Enter_cnt := 0
     F13 & Right::Send {Blind}{End}
 
     ;---other---
-    F12::
-        CoordMode, Mouse, Screen ;; mouse absolute pos setting
-        MouseGetPos, Xmou, Ymou, winid
-        MsgBox, %Xmou% %Ymou%
-        return
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -205,17 +200,21 @@ global Enter_cnt := 0
             CoordMode, Mouse, Screen ;; mouse absolute pos setting
             MouseGetPos, Xmou, Ymou, winid
             WinActivate, ahk_id %winid%
-            Keywait, LButton, U T0.1
-            if (ErrorLevel=1){
-                ;; hold click
-                get_moni2()
-                rate_setting()
-                resize_long_click()
-            }else{
-                ;; click
-                get_moni2()
-                rate_setting()
-                resize_short_click()
+            WinGetClass, win_class, A
+            if (win_class=="WorkerW" || win_class=="Shell_TrayWnd"){
+            }else {
+                Keywait, LButton, U T0.1
+                if (ErrorLevel=1){
+                    ;; hold click
+                    get_moni2()
+                    rate_setting()
+                    resize_long_click()
+                }else{
+                    ;; click
+                    get_moni2()
+                    rate_setting()
+                    resize_short_click()
+                }
             }
             return
 
@@ -291,21 +290,21 @@ global Enter_cnt := 0
 
         resize_short_click(){
             if (Wrate>=0.8){
-                ;; center open 
+                ;; close center 
                 resize_center_buf(moni_sel)
             }else if (Hrate>0.8){
-                ;; side open
+                ;; close side
                 if (Xmou_rate<middle_rate){
-                    ;; left
+                    ;; close left
                     reset_middle(moni_sel, 0)
                     resize_left_buf(moni_sel)
                 }else {
-                    ;; right
+                    ;; close right
                     reset_middle(moni_sel, 1)
                     resize_right_buf(moni_sel)
                 }   
             }else {
-                ;; small
+                ;; open side
                 if (Xmou_rate<middle_rate){
                     ;; open left side
                     resizewin2(moni_sel, 0, yedge, middle_rate, 1-yedge*4)

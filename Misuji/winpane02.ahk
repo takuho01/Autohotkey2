@@ -276,7 +276,7 @@ global Enter_cnt := 0
                 Hrate := H / m2_moni_height
                 Xmou_rate := (Xmou - m2_moni_left)/m2_moni_width
                 Ymou_rate := (Ymou - m2_moni_top)/m2_moni_height
-                middle_rate := m1_middle_rate
+                middle_rate := m2_middle_rate
             }else if(moni_sel==3){
                 Xrate := (X - m3_moni_left) / m3_moni_width
                 Yrate := (Y - m3_moni_top) / m3_moni_height
@@ -284,7 +284,7 @@ global Enter_cnt := 0
                 Hrate := H / m3_moni_height
                 Xmou_rate := (Xmou - m3_moni_left)/m3_moni_width
                 Ymou_rate := (Ymou - m3_moni_top)/m3_moni_height
-                middle_rate := m1_middle_rate
+                middle_rate := m3_middle_rate
             }
 
         }

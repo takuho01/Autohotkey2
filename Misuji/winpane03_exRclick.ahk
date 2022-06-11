@@ -944,6 +944,15 @@ global Enter_cnt := 0
                 MouseClick LEFT , , , , , U,
             }
             Return
+        RButton::
+            If (A_PriorHotKey == A_ThisHotKey and A_TimeSincePriorHotkey < 300){
+                
+            }else{
+                MouseClick RIGHT , , , , , D,
+                Keywait RButton, 
+                MouseClick RIGHT , , , , , U,
+            }
+            Return
     #IfWinActive
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

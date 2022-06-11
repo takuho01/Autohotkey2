@@ -16,8 +16,8 @@ global moni_sel
 global middle_rate
 global xedge := 0.01
 global yedge := 0.03
-global open_yrate := 0.03 
-global open_hrate := 0.94
+global open_yrate := 0.01
+global open_hrate := 0.95
 
 global m1_moni_left
 global m1_moni_top

@@ -1,5 +1,10 @@
 ;; 2022/05/21 Taku Honda
 
+;--- config ---
+;; for vscode wheel script
+#MaxHotkeysPerInterval, 200
+
+
 ;---spjlekcial move---
 ; 変数定義は一番最初で実行しないと、謎のエラーが起きる
 global winpane_on := 1
@@ -16,8 +21,10 @@ global moni_sel
 global middle_rate
 global xedge := 0.01
 global yedge := 0.03
-global open_yrate := 0.01
-global open_hrate := 0.95
+global side_open_yrate := 0.01
+global side_open_hrate := 0.85
+global center_open_yrate := 0.01
+global center_open_hrate := 0.95
 
 global m1_moni_left
 global m1_moni_top
@@ -84,6 +91,9 @@ global km2_mode := 0
 
 ;;; miro ;;;
 global rclick_flag := 0
+
+;;; vscode ;;;
+global  := 0
 
 ;;; excel vim ;;;
 global ev_mode := 0
@@ -422,7 +432,7 @@ global Enter_cnt := 0
             if (Wrate>=0.9){
                 ;; close center 
                 resize_center_buf(moni_sel)
-            }else if (Hrate>0.9){
+            }else if (Hrate>0.8){
                 ;; close side
                 if (Xmou_rate<middle_rate){
                     ;; close left
@@ -437,11 +447,11 @@ global Enter_cnt := 0
                 ;; open side
                 if (Xmou_rate<middle_rate){
                     ;; open left side
-                    resizewin2(moni_sel, 0, open_yrate, middle_rate, open_hrate)
+                    resizewin2(moni_sel, 0, side_open_yrate, middle_rate, side_open_hrate)
                     get_left_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
                 }else{
                     ;; opne right side
-                    resizewin2(moni_sel, middle_rate, open_yrate, 1-middle_rate, open_hrate)
+                    resizewin2(moni_sel, middle_rate, side_open_yrate, 1-middle_rate, side_open_hrate)
                     get_right_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
                 }
             }
@@ -451,7 +461,7 @@ global Enter_cnt := 0
             if (Wrate<0.8) {
                 get_center_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
             }
-            resizewin2(moni_sel, xedge, open_yrate, 1-xedge*2, open_hrate)
+            resizewin2(moni_sel, xedge, center_open_yrate, 1-xedge*2, center_open_hrate)
         }
 
         reset_middle(moni, side){
@@ -672,17 +682,77 @@ global Enter_cnt := 0
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     #IfWinActive,ahk_exe Miro.exe
         ;; Double Click as create new TEXT
+        ; LButton::
+        ;     If (A_PriorHotKey == A_ThisHotKey and A_TimeSincePriorHotkey < 300){
+        ;         send t
+        ;         MouseClick LEFT , , , , , D,
+        ;         MouseClick LEFT , , , , , U,
+        ;     }else{
+        ;         MouseClick LEFT , , , , , D,
+        ;         Keywait LButton, 
+        ;         MouseClick LEFT , , , , , U,
+        ;     }
+        ;     Return
         LButton::
-            If (A_PriorHotKey == A_ThisHotKey and A_TimeSincePriorHotkey < 300){
-                send t
-                MouseClick LEFT , , , , , D,
-                MouseClick LEFT , , , , , U,
-            }else{
+            keywait, LButton, U T0.1
+            if (ErrorLevel==1){
+                ;; single click hold
                 MouseClick LEFT , , , , , D,
                 Keywait LButton, 
                 MouseClick LEFT , , , , , U,
+            }else{
+                keywait, LButton, D T0.1
+                if (ErrorLevel==1){
+                    ;; single click
+                    MouseClick LEFT , , , , , D,
+                    MouseClick LEFT , , , , , U,
+                }else{
+                    keywait, LButton, U
+                    keywait, LButton, D T0.1
+                    if (ErrorLevel==1){
+                        ;; double click
+                        click 2
+                    }else {
+                        ;; triple click
+                        send t
+                        MouseClick LEFT , , , , , D,
+                        MouseClick LEFT , , , , , U,                        
+                    }
+                }
             }
-            Return
+            return
+    #IfWinActive
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; VScode ;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    #IfWinActive,ahk_exe Code.exe
+        RButton::
+            keywait, RButton, U T0.1
+            if (ErrorLevel==1){
+                ;; single click hold
+                MouseClick MIDDLE , , , , , D,
+                Keywait RButton, 
+                MouseClick MIDDLE , , , , , U,
+            }else{
+                keywait, RButton, D T0.1
+                if (ErrorLevel==1){
+                    ;; single click
+                    MouseClick RIGHT , , , , , D,
+                    MouseClick RIGHT , , , , , U,
+                }else{
+                    keywait, RButton, U
+                    keywait, RButton, D T0.1
+                    if (ErrorLevel==1){
+                        ;; double click
+                    }else {
+                        ;; triple click
+                    }
+                }
+            }
+            return
+        WheelUp:: send ^{WheelUp}
+        WheelDown::send ^{WheelDown}
     #IfWinActive
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

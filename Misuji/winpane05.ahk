@@ -21,10 +21,15 @@ global moni_sel
 global middle_rate
 global xedge := 0.01
 global yedge := 0.03
-global side_open_yrate := 0.01
-global side_open_hrate := 0.95
+global side_open_xrate := 0.01
+global side_open_yrate := 0.05
+global side_open_hrate := 0.85
 global center_open_yrate := 0.01
 global center_open_hrate := 0.95
+global midcenter_open_xrate := 0.05
+global midcenter_open_yrate := 0.05
+global midcenter_open_wrate := 0.9
+global midcenter_open_hrate := 0.85
 
 global m1_moni_left
 global m1_moni_top
@@ -35,6 +40,10 @@ global m1_c_buf_x := 0.4
 global m1_c_buf_y := 0.4
 global m1_c_buf_w := 0.3
 global m1_c_buf_h := 0.4
+global m1_mc_buf_x := 0.4
+global m1_mc_buf_y := 0.3
+global m1_mc_buf_w := 0.3
+global m1_mc_buf_h := 0.4
 global m1_l_buf_x := 0.2
 global m1_l_buf_y := 0.4
 global m1_l_buf_w := 0.3
@@ -53,6 +62,10 @@ global m2_c_buf_x := 0.4
 global m2_c_buf_y := 0.4
 global m2_c_buf_w := 0.3
 global m2_c_buf_h := 0.4
+global m2_mc_buf_x := 0.4
+global m2_mc_buf_y := 0.3
+global m2_mc_buf_w := 0.3
+global m2_mc_buf_h := 0.4
 global m2_l_buf_x := 0.2
 global m2_l_buf_y := 0.4
 global m2_l_buf_w := 0.3
@@ -71,6 +84,10 @@ global m3_c_buf_x := 0.4
 global m3_c_buf_y := 0.4
 global m3_c_buf_w := 0.3
 global m3_c_buf_h := 0.4
+global m3_mc_buf_x := 0.4
+global m3_mc_buf_y := 0.3
+global m3_mc_buf_w := 0.3
+global m3_mc_buf_h := 0.4
 global m3_l_buf_x := 0.2
 global m3_l_buf_y := 0.4
 global m3_l_buf_w := 0.3
@@ -331,7 +348,7 @@ global Enter_cnt := 0
                     Ymou_edge := Y+H-Ymou
                 }
                 
-                Keywait, LButton, U T0.2
+                Keywait, LButton, U T0.1
                 if (ErrorLevel=1){
                     CoordMode, Mouse, Screen ;; mouse absolute pos setting
                     MouseGetPos, Xmou, Ymou, winid
@@ -377,7 +394,7 @@ global Enter_cnt := 0
                         }
                     }         
                 }else{
-                    keywait, LButton, D T0.1
+                    keywait, LButton, D T0.15
                     if (ErrorLevel==1){
                         ;; single click
                         get_moni2()
@@ -387,13 +404,7 @@ global Enter_cnt := 0
                         ;; double click
                         get_moni2()
                         rate_setting()
-                        if (moni_sel==1){
-                            m1_middle_rate := Xmou_rate
-                        }else if (moni_sel==2){
-                            m2_middle_rate := Xmou_rate
-                        }else if (moni_sel==3){
-                            m3_middle_rate := Xmou_rate
-                        }
+                        resize_double_click()
                     }
                 }
             }
@@ -475,7 +486,10 @@ global Enter_cnt := 0
         }
 
         resize_short_click(){
-            if (Wrate>=0.9){
+            if (Xrate==midcenter_open_xrate && Wrate==midcenter_open_wrate){
+                    ;; close middle center
+                    resize_midcenter_buf(moni_sel)
+            }else if (Wrate>=0.9){
                 ;; close center 
                 resize_center_buf(moni_sel)
             }else if (Hrate>0.8){
@@ -493,69 +507,23 @@ global Enter_cnt := 0
                 ;; open side
                 if (Xmou_rate<middle_rate){
                     ;; open left side
-                    resizewin2(moni_sel, 0, side_open_yrate, middle_rate, side_open_hrate)
+                    resizewin2(moni_sel, side_open_xrate, side_open_yrate, middle_rate-side_open_xrate*2, side_open_hrate)
                     get_left_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
                 }else{
                     ;; opne right side
-                    resizewin2(moni_sel, middle_rate, side_open_yrate, 1-middle_rate, side_open_hrate)
+                    resizewin2(moni_sel, middle_rate, side_open_yrate, 1-middle_rate-side_open_xrate*2, side_open_hrate)
                     get_right_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
                 }
             }
         }
 
-        resize_double_click(){
-            resizewin2(moni_sel, 0.2, 0.2, 0.6, 0.6)
-            ; get_midcenter_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
-        }
-
-        resize_short_click_Lside(){
-            if (Wrate>=0.9){
-                ;; close center 
-                resize_center_buf(moni_sel)
-            }else if (Hrate>0.8){
-                ;; close side
-                if (Xmou_rate<middle_rate){
-                    ;; close left
-                    reset_middle(moni_sel, 0)
-                    resize_left_buf(moni_sel)
-                }else {
-                    ;; close right
-                    reset_middle(moni_sel, 1)
-                    resize_right_buf(moni_sel)
-                }   
-            }else {
-                ;; open side
-                resizewin2(moni_sel, 0, side_open_yrate, middle_rate, side_open_hrate)
-                get_left_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
-            }
-        }
-
-        resize_short_click_Rside(){
-            if (Wrate>=0.9){
-                ;; close center 
-                resize_center_buf(moni_sel)
-            }else if (Hrate>0.8){
-                ;; close side
-                if (Xmou_rate<middle_rate){
-                    ;; close left
-                    reset_middle(moni_sel, 0)
-                    resize_left_buf(moni_sel)
-                }else {
-                    ;; close right
-                    reset_middle(moni_sel, 1)
-                    resize_right_buf(moni_sel)
-                }   
-            }else {
-                ;; open side
-                resizewin2(moni_sel, middle_rate, side_open_yrate, 1-middle_rate, side_open_hrate)
-                get_right_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
-            }
-        }
-
         resize_long_click(){
-            if (Wrate<0.8) {
-                get_center_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
-            }
+            resizewin2(moni_sel, midcenter_open_xrate, midcenter_open_yrate, midcenter_open_wrate, midcenter_open_hrate)
+            get_midcenter_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
+        }
+
+        resize_double_click(){
+            get_center_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
             resizewin2(moni_sel, xedge, center_open_yrate, 1-xedge*2, center_open_hrate)
         }
 
@@ -587,6 +555,16 @@ global Enter_cnt := 0
                 resizewin2(moni, m2_c_buf_x, m2_c_buf_y, m2_c_buf_w, m2_c_buf_h)
             }else if (moni==3){
                 resizewin2(moni, m3_c_buf_x, m3_c_buf_y, m3_c_buf_w, m3_c_buf_h)
+            }
+        }
+
+        resize_midcenter_buf(moni){
+            if (moni==1) {
+                resizewin2(moni, m1_mc_buf_x, m1_mc_buf_y, m1_mc_buf_w, m1_mc_buf_h)
+            }else if (moni==2){
+                resizewin2(moni, m2_mc_buf_x, m2_mc_buf_y, m2_mc_buf_w, m2_mc_buf_h)
+            }else if (moni==3){
+                resizewin2(moni, m3_mc_buf_x, m3_mc_buf_y, m3_mc_buf_w, m3_mc_buf_h)
             }
         }
 
@@ -626,6 +604,25 @@ global Enter_cnt := 0
                 m3_c_buf_y := ybuf
                 m3_c_buf_w := wbuf
                 m3_c_buf_h := hbuf
+            }
+        }
+
+        get_midcenter_buf(moni, xbuf, ybuf, wbuf, hbuf) {
+            if (moni==1) {
+                m1_mc_buf_x := xbuf
+                m1_mc_buf_y := ybuf
+                m1_mc_buf_w := wbuf
+                m1_mc_buf_h := hbuf
+            }else if (moni==2){
+                m2_mc_buf_x := xbuf
+                m2_mc_buf_y := ybuf
+                m2_mc_buf_w := wbuf
+                m2_mc_buf_h := hbuf
+            }else if (moni==3){
+                m3_mc_buf_x := xbuf
+                m3_mc_buf_y := ybuf
+                m3_mc_buf_w := wbuf
+                m3_mc_buf_h := hbuf
             }
         }
 

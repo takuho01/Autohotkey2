@@ -1,5 +1,10 @@
 ;; 2022/05/21 Taku Honda
 
+;--- config ---
+;; for vscode wheel script
+#MaxHotkeysPerInterval, 200
+
+
 ;---spjlekcial move---
 ; 変数定義は一番最初で実行しないと、謎のエラーが起きる
 global winpane_on := 1
@@ -16,8 +21,11 @@ global moni_sel
 global middle_rate
 global xedge := 0.01
 global yedge := 0.03
-global open_yrate := 0.01
-global open_hrate := 0.95
+global side_open_yrate := 0.01
+global side_open_hrate := 0.95
+global center_open_yrate := 0.01
+global center_open_hrate := 0.95
+global rclick_status := 0
 
 global m1_moni_left
 global m1_moni_top
@@ -84,6 +92,9 @@ global km2_mode := 0
 
 ;;; miro ;;;
 global rclick_flag := 0
+
+;;; vscode ;;;
+global  := 0
 
 ;;; excel vim ;;;
 global ev_mode := 0
@@ -193,14 +204,25 @@ global Enter_cnt := 0
                 Keywait, RButton, U T0.1
                 if (ErrorLevel=1){
                     ;; hold
-                    ; resizewin(Xmou-250, Ymou-250, 1000, 800)
-                    ; mid_resize := 0
-                }else{
-                    ; resizewin(Xmou-250, Ymou-250, 500, 400)
                     get_moni2()
                     rate_setting()
-                    resizewin2(moni_sel, Xmou_rate-0.15, Ymou_rate-0.2, 0.3, 0.4)
-                    ; mid_resize := 1
+                    resizewin2(moni_sel, Xmou_rate-0.1, Ymou_rate-0.1, 0.15, 0.25)
+                }else{
+                    ;; click
+                    if (rclick_status==2){
+                        rclick_status := 0
+                    }else {
+                        rclick_status := rclick_status + 1
+                    }
+                    get_moni2()
+                    rate_setting()
+                    if (rclick_status==0){
+                        resizewin2(moni_sel, Xmou_rate-0.1, Ymou_rate-0.1, 0.15, 0.25)
+                    }else if (rclick_status==1){
+                        resizewin2(moni_sel, Xmou_rate-0.1, Ymou_rate-0.15, 0.22, 0.3)
+                    }else if (rclick_status==2){
+                        resizewin2(moni_sel, Xmou_rate-0.1, Ymou_rate-0.2, 0.5, 0.6)
+                    }
                 }
             }
             return
@@ -347,6 +369,15 @@ global Enter_cnt := 0
         F13 & LButton::
             send {CtrlDown}
             MouseClick LEFT , , , , , D,
+            Keywait LButton, 
+            MouseClick LEFT , , , , , U,
+            send {CtrlUp}
+            return
+
+        ^+LButton::
+            send {CtrlDown}
+            MouseClick LEFT , , , , , D,
+            Keywait LButton, 
             MouseClick LEFT , , , , , U,
             send {CtrlUp}
             return
@@ -422,7 +453,7 @@ global Enter_cnt := 0
             if (Wrate>=0.9){
                 ;; close center 
                 resize_center_buf(moni_sel)
-            }else if (Hrate>0.9){
+            }else if (Hrate>0.8){
                 ;; close side
                 if (Xmou_rate<middle_rate){
                     ;; close left
@@ -437,11 +468,11 @@ global Enter_cnt := 0
                 ;; open side
                 if (Xmou_rate<middle_rate){
                     ;; open left side
-                    resizewin2(moni_sel, 0, open_yrate, middle_rate, open_hrate)
+                    resizewin2(moni_sel, 0, side_open_yrate, middle_rate, side_open_hrate)
                     get_left_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
                 }else{
                     ;; opne right side
-                    resizewin2(moni_sel, middle_rate, open_yrate, 1-middle_rate, open_hrate)
+                    resizewin2(moni_sel, middle_rate, side_open_yrate, 1-middle_rate, side_open_hrate)
                     get_right_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
                 }
             }
@@ -451,7 +482,7 @@ global Enter_cnt := 0
             if (Wrate<0.8) {
                 get_center_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
             }
-            resizewin2(moni_sel, xedge, open_yrate, 1-xedge*2, open_hrate)
+            resizewin2(moni_sel, xedge, center_open_yrate, 1-xedge*2, center_open_hrate)
         }
 
         reset_middle(moni, side){
@@ -477,30 +508,39 @@ global Enter_cnt := 0
 
         resize_center_buf(moni){
             if (moni==1) {
+                resizewin2(moni, m1_c_buf_x-0.05, m1_c_buf_y-0.05, m1_c_buf_w+0.1, m1_c_buf_h+0.1)
                 resizewin2(moni, m1_c_buf_x, m1_c_buf_y, m1_c_buf_w, m1_c_buf_h)
             }else if (moni==2){
+                resizewin2(moni, m2_c_buf_x-0.05, m2_c_buf_y-0.05, m2_c_buf_w+0.1, m2_c_buf_h+0.1)
                 resizewin2(moni, m2_c_buf_x, m2_c_buf_y, m2_c_buf_w, m2_c_buf_h)
             }else if (moni==3){
+                resizewin2(moni, m3_c_buf_x-0.05, m3_c_buf_y-0.05, m3_c_buf_w+0.1, m3_c_buf_h+0.1)
                 resizewin2(moni, m3_c_buf_x, m3_c_buf_y, m3_c_buf_w, m3_c_buf_h)
             }
         }
 
         resize_left_buf(moni){
             if (moni==1) {
+                resizewin2(moni, m1_l_buf_x-0.05, m1_l_buf_y-0.05, m1_l_buf_w+0.1, m1_l_buf_h+0.1)
                 resizewin2(moni, m1_l_buf_x, m1_l_buf_y, m1_l_buf_w, m1_l_buf_h)
             }else if (moni==2){
+                resizewin2(moni, m2_l_buf_x-0.05, m2_l_buf_y-0.05, m2_l_buf_w+0.1, m2_l_buf_h+0.1)
                 resizewin2(moni, m2_l_buf_x, m2_l_buf_y, m2_l_buf_w, m2_l_buf_h)
             }else if (moni==3){
+                resizewin2(moni, m3_l_buf_x-0.05, m3_l_buf_y-0.05, m3_l_buf_w+0.1, m3_l_buf_h+0.1)
                 resizewin2(moni, m3_l_buf_x, m3_l_buf_y, m3_l_buf_w, m3_l_buf_h)
             }
         }
 
         resize_right_buf(moni){
             if (moni==1) {
+                resizewin2(moni, m1_r_buf_x-0.05, m1_r_buf_y-0.05, m1_r_buf_w+0.1, m1_r_buf_h+0.1)
                 resizewin2(moni, m1_r_buf_x, m1_r_buf_y, m1_r_buf_w, m1_r_buf_h)
             }else if (moni==2){
+                resizewin2(moni, m2_r_buf_x-0.05, m2_r_buf_y-0.05, m2_r_buf_w+0.1, m2_r_buf_h+0.1)
                 resizewin2(moni, m2_r_buf_x, m2_r_buf_y, m2_r_buf_w, m2_r_buf_h)
             }else if (moni==3){
+                resizewin2(moni, m3_r_buf_x-0.05, m3_r_buf_y-0.05, m3_r_buf_w+0.1, m3_r_buf_h+0.1)
                 resizewin2(moni, m3_r_buf_x, m3_r_buf_y, m3_r_buf_w, m3_r_buf_h)
             }
         }
@@ -672,18 +712,113 @@ global Enter_cnt := 0
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     #IfWinActive,ahk_exe Miro.exe
         ;; Double Click as create new TEXT
+        ; LButton::
+        ;     If (A_PriorHotKey == A_ThisHotKey and A_TimeSincePriorHotkey < 300){
+        ;         send t
+        ;         MouseClick LEFT , , , , , D,
+        ;         MouseClick LEFT , , , , , U,
+        ;     }else{
+        ;         MouseClick LEFT , , , , , D,
+        ;         Keywait LButton, 
+        ;         MouseClick LEFT , , , , , U,
+        ;     }
+        ;     Return
         LButton::
-            If (A_PriorHotKey == A_ThisHotKey and A_TimeSincePriorHotkey < 300){
-                send t
-                MouseClick LEFT , , , , , D,
-                MouseClick LEFT , , , , , U,
-            }else{
+            keywait, LButton, U T0.1
+            if (ErrorLevel==1){
+                ;; single click hold
                 MouseClick LEFT , , , , , D,
                 Keywait LButton, 
                 MouseClick LEFT , , , , , U,
+            }else{
+                keywait, LButton, D T0.1
+                if (ErrorLevel==1){
+                    ;; single click
+                    MouseClick LEFT , , , , , D,
+                    MouseClick LEFT , , , , , U,
+                }else{
+                    keywait, LButton, U
+                    keywait, LButton, D T0.1
+                    if (ErrorLevel==1){
+                        ;; double click
+                        click 2
+                    }else {
+                        ;; triple click
+                        send t
+                        MouseClick LEFT , , , , , D,
+                        MouseClick LEFT , , , , , U,
+                    }
+                }
             }
-            Return
+            return
     #IfWinActive
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; VScode ;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    #IfWinActive,ahk_exe Code.exe
+        RButton::
+            keywait, RButton, U T0.1
+            if (ErrorLevel==1){
+                ;; single click hold
+                MouseClick MIDDLE , , , , , D,
+                Keywait RButton, 
+                MouseClick MIDDLE , , , , , U,
+            }else{
+                keywait, RButton, D T0.1
+                if (ErrorLevel==1){
+                    ;; single click
+                    MouseClick RIGHT , , , , , D,
+                    MouseClick RIGHT , , , , , U,
+                }else{
+                    keywait, RButton, U
+                    keywait, RButton, D T0.1
+                    if (ErrorLevel==1){
+                        ;; double click
+                    }else {
+                        ;; triple click
+                    }
+                }
+            }
+            return
+        ;;this cord dont work on lets note
+        ; WheelUp:: send ^{WheelUp}
+        ; WheelDown:: send ^{WheelDown}
+    #IfWinActive
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Power point ;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    #IfWinActive,ahk_exe POWERPNT.EXE
+        ; RButton::
+        ;     keywait, RButton, U T0.1
+        ;     if (ErrorLevel==1){
+        ;         ;; single click hold
+        ;         MouseClick MIDDLE , , , , , D,
+        ;         Keywait RButton, 
+        ;         MouseClick MIDDLE , , , , , U,
+        ;     }else{
+        ;         keywait, RButton, D T0.1
+        ;         if (ErrorLevel==1){
+        ;             ;; single click
+        ;             MouseClick RIGHT , , , , , D,
+        ;             MouseClick RIGHT , , , , , U,
+        ;         }else{
+        ;             keywait, RButton, U
+        ;             keywait, RButton, D T0.1
+        ;             if (ErrorLevel==1){
+        ;                 ;; double click
+        ;             }else {
+        ;                 ;; triple click
+        ;             }
+        ;         }
+        ;     }
+        ;     return
+        ; ;;this cord dont work on lets note
+        ; WheelUp:: send ^{WheelUp}
+        ; WheelDown:: send ^{WheelDown}
+    #IfWinActive
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Onenote ;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -754,6 +889,8 @@ global Enter_cnt := 0
                 send ^c
             }
             return
+        Tab:: send !6
+        +Tab:: send !7
     #IfWinActive
 
     #IF (ev_mode==normal_mode && km_mode==1)

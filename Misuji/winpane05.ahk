@@ -236,14 +236,25 @@ global Enter_cnt := 0
                 Keywait, RButton, U T0.1
                 if (ErrorLevel=1){
                     ;; hold
-                }else{
-                    ; get_moni2()
-                    ; rate_setting()
-                    ; resizewin2(moni_sel, Xmou_rate-0.15, Ymou_rate-0.2, 0.3, 0.4)
                     get_moni2()
                     rate_setting()
-                    resize_short_click()
-        
+                    resizewin2(moni_sel, Xmou_rate-0.1, Ymou_rate-0.1, 0.15, 0.25)
+                }else{
+                    ;; click
+                    if (rclick_status==2){
+                        rclick_status := 0
+                    }else {
+                        rclick_status := rclick_status + 1
+                    }
+                    get_moni2()
+                    rate_setting()
+                    if (rclick_status==0){
+                        resizewin2(moni_sel, Xmou_rate-0.1, Ymou_rate-0.1, 0.15, 0.25)
+                    }else if (rclick_status==1){
+                        resizewin2(moni_sel, Xmou_rate-0.1, Ymou_rate-0.15, 0.22, 0.3)
+                    }else if (rclick_status==2){
+                        resizewin2(moni_sel, Xmou_rate-0.1, Ymou_rate-0.2, 0.5, 0.6)
+                    }
                 }
             }
             return
@@ -890,6 +901,8 @@ global Enter_cnt := 0
                 send ^c
             }
             return
+        Tab:: send !6
+        +Tab:: send !7
     #IfWinActive
 
     #IF (ev_mode==normal_mode && km_mode==1)

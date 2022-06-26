@@ -30,6 +30,12 @@ global midcenter_open_xrate := 0.05
 global midcenter_open_yrate := 0.05
 global midcenter_open_wrate := 0.9
 global midcenter_open_hrate := 0.85
+global left_side_click_flag := 0
+global right_side_click_flag := 0
+global side_click_moni
+global side_click_id
+global win_class
+global winid
 
 global m1_moni_left
 global m1_moni_top
@@ -217,9 +223,22 @@ global Enter_cnt := 0
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; winpane ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        F1::
+            CoordMode, Mouse, Screen ;; mouse absolute pos setting
+            MouseGetPos, Xmou, Ymou, winid
+            WinMove, ahk_id %winid%, ,0,0,400, 400
+            WinGet, tmp_pid , PID, A, , ,
+            ; get_moni2()
+            ; rate_setting()
+            ; ; tmp_id := winid
+            ; ; tmp_pid := 20256
+            ; ; WinMove, ahk_pid %tmp_pid%, ,0, 0, 400, 400
+            ; ; resizewin_id(tmp_id, 1, 0, 0, 0.3, 0.3)
+            ; resizewin_id(tmp_pid, 1, 0, 0, 0.3, 0.3)
+            return
+
         ^MButton::
             CoordMode, Mouse, Screen ;; mouse absolute pos setting
-    ; ^Up::MsgBox, hoge
             MouseGetPos, Xmou, Ymou, winid
             WinActivate, ahk_id %winid%
             WinGetClass, win_class, A
@@ -277,21 +296,6 @@ global Enter_cnt := 0
             WinGetClass, win_class, A
             WinGetPos,X,Y,W,H,A
             if (win_class=="WorkerW" || win_class=="Shell_TrayWnd" || win_class=="Shell_SecondaryTrayWnd"){
-                    keywait, LButton, D T0.1
-                    if (ErrorLevel==1){
-                        ;; single click
-                    }else{
-                        ;; double click
-                        get_moni2()
-                        rate_setting()
-                        if (moni_sel==1){
-                            m1_middle_rate := Xmou_rate
-                        }else if (moni_sel==2){
-                            m2_middle_rate := Xmou_rate
-                        }else if (moni_sel==3){
-                            m3_middle_rate := Xmou_rate
-                        }
-                    }
             }else {
                 Xmou_pre := Xmou
                 Ymou_pre := Ymou
@@ -431,17 +435,22 @@ global Enter_cnt := 0
             }
             return
 
-        ^!F1::
+        ^F1::
             CoordMode, Mouse, Screen ;; mouse absolute pos setting
             MouseGetPos, Xmou, Ymou, winid
             WinActivate, ahk_id %winid%
             WinGetClass, win_class, A
             WinGetPos,X,Y,W,H,A
-            get_moni2()
-            rate_setting()
-            ; resize_short_click()
-            ; resize_long_click()
-            resize_click()
+            if (win_class=="WorkerW" || win_class=="Shell_TrayWnd" || win_class=="Shell_SecondaryTrayWnd"){
+            }else {
+                get_moni2()
+                rate_setting()
+                if (left_side_click_flag==1 || right_side_click_flag==1){
+                    resize_side_select()
+                }else{
+                    resize_click()
+                }
+            }
             return
 
         ;; alternative ctrl click
@@ -475,6 +484,26 @@ global Enter_cnt := 0
                 rszH := m3_moni_height * Hrate
             }
             WinMove, A, , rszX, rszY, rszW, rszH
+        }
+
+        resizewin_id(wid, moni, Xrate, Yrate, Wrate, Hrate){
+            if (moni==1){
+                rszX := m1_moni_left + m1_moni_width * Xrate
+                rszY := m1_moni_top + m1_moni_height * Yrate
+                rszW := m1_moni_width * Wrate
+                rszH := m1_moni_height * Hrate
+            }else if (moni==2){
+                rszX := m2_moni_left + m2_moni_width * Xrate
+                rszY := m2_moni_top + m2_moni_height * Yrate
+                rszW := m2_moni_width * Wrate
+                rszH := m2_moni_height * Hrate
+            }else if(moni==3){
+                rszX := m3_moni_left + m3_moni_width * Xrate
+                rszY := m3_moni_top + m3_moni_height * Yrate
+                rszW := m3_moni_width * Wrate
+                rszH := m3_moni_height * Hrate
+            }
+            WinMove, ahk_id %wid%, , rszX, rszY, rszW, rszH
         }
 
         rate_setting(){
@@ -521,10 +550,32 @@ global Enter_cnt := 0
 
         resize_click(){
             if (Xrate==midcenter_open_xrate && Wrate==midcenter_open_wrate){
-                if (Xmou_rate<midcenter_open_xrate+0.2){
-                    resizewin2(moni_sel, side_open_xrate, side_open_yrate, middle_rate-side_open_xrate*2, side_open_hrate)
-                }else if (Xmou_rate>midcenter_open_xrate+midcenter_open_wrate-0.2){
-                    resizewin2(moni_sel, middle_rate, side_open_yrate, 1-middle_rate-side_open_xrate*2, side_open_hrate)
+                if (Xmou_rate<midcenter_open_xrate+0.1){
+                    ;; snap left side
+                    resizewin2(moni_sel, side_open_xrate, 0.9, middle_rate-side_open_xrate*2, side_open_hrate)
+                    if (moni_sel==1){
+                        get_left_buf(moni_sel, m1_mc_buf_x, m1_mc_buf_y, m1_mc_buf_w, m1_mc_buf_h)
+                    }else if (moni_sel==2){
+                        get_left_buf(moni_sel, m2_mc_buf_x, m2_mc_buf_y, m2_mc_buf_w, m2_mc_buf_h)
+                    }else if (moni_sel==3){
+                        get_left_buf(moni_sel, m3_mc_buf_x, m3_mc_buf_y, m3_mc_buf_w, m3_mc_buf_h)
+                    }
+                    left_side_click_flag := 1
+                    side_click_moni := moni_sel
+                    side_click_id := winid
+                }else if (Xmou_rate>midcenter_open_xrate+midcenter_open_wrate-0.1){
+                    ;; snap right side
+                    resizewin2(moni_sel, middle_rate, 0.9, 1-middle_rate-side_open_xrate*2, side_open_hrate)
+                    if (moni_sel==1){
+                        get_right_buf(moni_sel, m1_mc_buf_x, m1_mc_buf_y, m1_mc_buf_w, m1_mc_buf_h)
+                    }else if (moni_sel==2){
+                        get_right_buf(moni_sel, m2_mc_buf_x, m2_mc_buf_y, m2_mc_buf_w, m2_mc_buf_h)
+                    }else if (moni_sel==3){
+                        get_right_buf(moni_sel, m3_mc_buf_x, m3_mc_buf_y, m3_mc_buf_w, m3_mc_buf_h)
+                    }
+                    right_side_click_flag := 1
+                    side_click_moni := moni_sel
+                    side_click_id := winid
                 }else {
                     ;; close middle center
                     resize_midcenter_buf(moni_sel)
@@ -536,17 +587,31 @@ global Enter_cnt := 0
                 ;; close side
                 if (Xmou_rate<middle_rate){
                     ;; close left
-                    ; reset_middle(moni_sel, 0)
-                    resize_midcenter_buf(moni_sel)
+                    resize_left_buf(moni_sel)
                 }else {
                     ;; close right
-                    ; reset_middle(moni_sel, 1)
-                    resize_midcenter_buf(moni_sel)
+                    resize_right_buf(moni_sel)
                 }   
             }else {
                 ;; open middle center
                 resizewin2(moni_sel, midcenter_open_xrate, midcenter_open_yrate, midcenter_open_wrate, midcenter_open_hrate)
                 get_midcenter_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
+            }
+        }
+
+        resize_side_select(){
+            if (left_side_click_flag==1){
+                ;; open right
+                resizewin2(moni_sel, middle_rate, side_open_yrate, 1-middle_rate-side_open_xrate*2, side_open_hrate)
+                get_right_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
+                left_side_click_flag := 0
+                resizewin_id(side_click_id, moni_sel, side_open_xrate, side_open_yrate, middle_rate-side_open_xrate*2, side_open_hrate)
+            }else if (right_side_click_flag==1){
+                ;; open left
+                resizewin2(moni_sel, side_open_xrate, side_open_yrate, middle_rate-side_open_xrate*2, side_open_hrate)
+                get_left_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
+                right_side_click_flag := 0
+                resizewin_id(side_click_id, moni_sel, middle_rate, side_open_yrate, 1-middle_rate-side_open_xrate*2, side_open_hrate)
             }
         }
 

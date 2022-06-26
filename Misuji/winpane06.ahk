@@ -36,6 +36,15 @@ global side_click_moni
 global side_click_id
 global win_class
 global winid
+global m1_lid
+global m1_rid
+global m1_cid
+global m2_lid
+global m2_rid
+global m2_cid
+global m3_lid
+global m3_rid
+global m3_cid
 
 global m1_moni_left
 global m1_moni_top
@@ -246,11 +255,16 @@ global Enter_cnt := 0
             rate_setting()
             if (moni_sel==1){
                 m1_middle_rate := Xmou_rate
+                middle_rate := m1_middle_rate
             }else if (moni_sel==2){
                 m2_middle_rate := Xmou_rate
+                middle_rate := m2_middle_rate
             }else if (moni_sel==3){
                 m3_middle_rate := Xmou_rate
+                middle_rate := m3_middle_rate
             }
+            resizewin_id(get_id(moni_sel, 1), moni_sel, side_open_xrate, side_open_yrate, middle_rate-side_open_xrate, side_open_hrate)
+            resizewin_id(get_id(moni_sel, 2), moni_sel, middle_rate, side_open_yrate, 1-middle_rate-side_open_xrate, side_open_hrate)
             return
 
         ^RButton::
@@ -442,6 +456,12 @@ global Enter_cnt := 0
             WinGetClass, win_class, A
             WinGetPos,X,Y,W,H,A
             if (win_class=="WorkerW" || win_class=="Shell_TrayWnd" || win_class=="Shell_SecondaryTrayWnd"){
+                if (left_side_click_flag==1 || right_side_click_flag==1){
+                    reset_midcenter()
+                } else {
+                    resize_left_buf_id(get_id(moni_sel, 1), moni_sel)
+                    resize_right_buf_id(get_id(moni_sel, 2), moni_sel)                  
+                }
             }else {
                 get_moni2()
                 rate_setting()
@@ -484,6 +504,7 @@ global Enter_cnt := 0
                 rszH := m3_moni_height * Hrate
             }
             WinMove, A, , rszX, rszY, rszW, rszH
+            WinActivate, ahk_id %wid%
         }
 
         resizewin_id(wid, moni, Xrate, Yrate, Wrate, Hrate){
@@ -504,6 +525,7 @@ global Enter_cnt := 0
                 rszH := m3_moni_height * Hrate
             }
             WinMove, ahk_id %wid%, , rszX, rszY, rszW, rszH
+            WinActivate, ahk_id %wid%
         }
 
         rate_setting(){
@@ -552,7 +574,7 @@ global Enter_cnt := 0
             if (Xrate==midcenter_open_xrate && Wrate==midcenter_open_wrate){
                 if (Xmou_rate<midcenter_open_xrate+0.1){
                     ;; snap left side
-                    resizewin2(moni_sel, side_open_xrate, 0.9, middle_rate-side_open_xrate*2, side_open_hrate)
+                    resizewin2(moni_sel, -0.2, side_open_yrate, 0.3, side_open_hrate)
                     if (moni_sel==1){
                         get_left_buf(moni_sel, m1_mc_buf_x, m1_mc_buf_y, m1_mc_buf_w, m1_mc_buf_h)
                     }else if (moni_sel==2){
@@ -561,11 +583,10 @@ global Enter_cnt := 0
                         get_left_buf(moni_sel, m3_mc_buf_x, m3_mc_buf_y, m3_mc_buf_w, m3_mc_buf_h)
                     }
                     left_side_click_flag := 1
-                    side_click_moni := moni_sel
-                    side_click_id := winid
+                    set_id(moni_sel, 1, winid)
                 }else if (Xmou_rate>midcenter_open_xrate+midcenter_open_wrate-0.1){
                     ;; snap right side
-                    resizewin2(moni_sel, middle_rate, 0.9, 1-middle_rate-side_open_xrate*2, side_open_hrate)
+                    resizewin2(moni_sel, 0.9, side_open_yrate, 1-middle_rate-side_open_xrate*2, side_open_hrate)
                     if (moni_sel==1){
                         get_right_buf(moni_sel, m1_mc_buf_x, m1_mc_buf_y, m1_mc_buf_w, m1_mc_buf_h)
                     }else if (moni_sel==2){
@@ -574,8 +595,7 @@ global Enter_cnt := 0
                         get_right_buf(moni_sel, m3_mc_buf_x, m3_mc_buf_y, m3_mc_buf_w, m3_mc_buf_h)
                     }
                     right_side_click_flag := 1
-                    side_click_moni := moni_sel
-                    side_click_id := winid
+                    set_id(moni_sel, 2, winid)
                 }else {
                     ;; close middle center
                     resize_midcenter_buf(moni_sel)
@@ -584,14 +604,39 @@ global Enter_cnt := 0
                 ;; close center
                 resize_center_buf(moni_sel)
             }else if (Hrate>0.8){
-                ;; close side
-                if (Xmou_rate<middle_rate){
-                    ;; close left
-                    resize_left_buf(moni_sel)
+                ;; click side panel
+                if (Wrate>0.85){
+                    if (Xrate<side_open_xrate+side_open_xrate*0.1){
+                        ;; click left
+                        resizewin2(moni_sel, side_open_xrate, side_open_yrate, middle_rate-side_open_xrate, side_open_hrate)
+                    }else{
+                        ;; click right
+                        resizewin2(moni_sel, middle_rate, side_open_yrate, 1-middle_rate-side_open_xrate, side_open_hrate)
+                    }
                 }else {
-                    ;; close right
-                    resize_right_buf(moni_sel)
-                }   
+                    if (Xmou_rate<middle_rate){
+                        ;; click left
+                        if (Xmou_rate>Xrate+Wrate-Wrate/2){
+                            ;; edge
+                            resizewin2(moni_sel, Xrate, Yrate, 0.89, Hrate)
+                        }else {
+                            resize_right_buf_id(get_id(moni_sel, 2), moni_sel)
+                            resizewin_id(get_id(moni_sel, 1), moni_sel, -0.2, side_open_yrate, 0.3, side_open_hrate)
+                            left_side_click_flag := 1
+                        }
+                    }else {
+                        ;; click right
+                        if (Xmou_rate<Xrate+Wrate/2){
+                            ;; edge
+                            resizewin2(moni_sel, Xrate-(0.89-Wrate), Yrate, 0.89, Hrate)
+                        }else{
+                            resize_left_buf_id(get_id(moni_sel, 1), moni_sel)
+                            resizewin_id(get_id(moni_sel, 2), moni_sel, 0.9, side_open_yrate, 1-middle_rate-side_open_xrate*2, side_open_hrate)
+                            right_side_click_flag := 1
+                        }
+                    }   
+                }
+
             }else {
                 ;; open middle center
                 resizewin2(moni_sel, midcenter_open_xrate, midcenter_open_yrate, midcenter_open_wrate, midcenter_open_hrate)
@@ -602,16 +647,42 @@ global Enter_cnt := 0
         resize_side_select(){
             if (left_side_click_flag==1){
                 ;; open right
-                resizewin2(moni_sel, middle_rate, side_open_yrate, 1-middle_rate-side_open_xrate*2, side_open_hrate)
+                resizewin2(moni_sel, middle_rate, side_open_yrate, 1-middle_rate-side_open_xrate, side_open_hrate)
                 get_right_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
                 left_side_click_flag := 0
-                resizewin_id(side_click_id, moni_sel, side_open_xrate, side_open_yrate, middle_rate-side_open_xrate*2, side_open_hrate)
+                resizewin_id(get_id(moni_sel, 1), moni_sel, side_open_xrate, side_open_yrate, middle_rate-side_open_xrate*2, side_open_hrate)
+                set_id(moni_sel, 2, winid)
             }else if (right_side_click_flag==1){
                 ;; open left
-                resizewin2(moni_sel, side_open_xrate, side_open_yrate, middle_rate-side_open_xrate*2, side_open_hrate)
+                resizewin2(moni_sel, side_open_xrate, side_open_yrate, middle_rate-side_open_xrate, side_open_hrate)
                 get_left_buf(moni_sel, Xrate, Yrate, Wrate, Hrate)
                 right_side_click_flag := 0
-                resizewin_id(side_click_id, moni_sel, middle_rate, side_open_yrate, 1-middle_rate-side_open_xrate*2, side_open_hrate)
+                resizewin_id(get_id(moni_sel, 2), moni_sel, middle_rate, side_open_yrate, 1-middle_rate-side_open_xrate*2, side_open_hrate)
+                set_id(moni_sel, 1, winid)
+            }
+        }
+
+        reset_midcenter(){
+            if (left_side_click_flag==1){
+                resizewin_id(get_id(moni_sel, 1),moni_sel, midcenter_open_xrate, midcenter_open_yrate, midcenter_open_wrate, midcenter_open_hrate)
+                left_side_click_flag := 0
+                if (moni_sel==1){
+                    get_midcenter_buf(moni_sel, m1_l_buf_x, m1_l_buf_y, m1_l_buf_w, m1_l_buf_h)
+                }else if (moni_sel==2){
+                    get_midcenter_buf(moni_sel, m2_l_buf_x, m2_l_buf_y, m2_l_buf_w, m2_l_buf_h)
+                }else if (moni_sel==3){
+                    get_midcenter_buf(moni_sel, m3_l_buf_x, m3_l_buf_y, m3_l_buf_w, m3_l_buf_h)
+                }
+            }else if (right_side_click_flag==1){
+                resizewin_id(get_id(moni_sel, 2),moni_sel, midcenter_open_xrate, midcenter_open_yrate, midcenter_open_wrate, midcenter_open_hrate)
+                right_side_click_flag := 0
+                if (moni_sel==1){
+                    get_midcenter_buf(moni_sel, m1_r_buf_x, m1_r_buf_y, m1_r_buf_w, m1_r_buf_h)
+                }else if (moni_sel==2){
+                    get_midcenter_buf(moni_sel, m2_r_buf_x, m2_r_buf_y, m2_r_buf_w, m2_r_buf_h)
+                }else if (moni_sel==3){
+                    get_midcenter_buf(moni_sel, m3_r_buf_x, m3_r_buf_y, m3_r_buf_w, m3_r_buf_h)
+                }
             }
         }
 
@@ -745,6 +816,46 @@ global Enter_cnt := 0
             }
         }
 
+        resize_center_buf_id(wid, moni){
+            if (moni==1) {
+                resizewin_id(wid, moni, m1_c_buf_x, m1_c_buf_y, m1_c_buf_w, m1_c_buf_h)
+            }else if (moni==2){
+                resizewin_id(wid, moni, m2_c_buf_x, m2_c_buf_y, m2_c_buf_w, m2_c_buf_h)
+            }else if (moni==3){
+                resizewin_id(wid, moni, m3_c_buf_x, m3_c_buf_y, m3_c_buf_w, m3_c_buf_h)
+            }
+        }
+
+        resize_midcenter_buf_id(wid, moni){
+            if (moni==1) {
+                resizewin_id(wid, moni, m1_mc_buf_x, m1_mc_buf_y, m1_mc_buf_w, m1_mc_buf_h)
+            }else if (moni==2){
+                resizewin_id(wid, moni, m2_mc_buf_x, m2_mc_buf_y, m2_mc_buf_w, m2_mc_buf_h)
+            }else if (moni==3){
+                resizewin_id(wid, moni, m3_mc_buf_x, m3_mc_buf_y, m3_mc_buf_w, m3_mc_buf_h)
+            }
+        }
+
+        resize_left_buf_id(wid, moni){
+            if (moni==1) {
+                resizewin_id(wid, moni, m1_l_buf_x, m1_l_buf_y, m1_l_buf_w, m1_l_buf_h)
+            }else if (moni==2){
+                resizewin_id(wid, moni, m2_l_buf_x, m2_l_buf_y, m2_l_buf_w, m2_l_buf_h)
+            }else if (moni==3){
+                resizewin_id(wid, moni, m3_l_buf_x, m3_l_buf_y, m3_l_buf_w, m3_l_buf_h)
+            }
+        }
+
+        resize_right_buf_id(wid, moni){
+            if (moni==1) {
+                resizewin_id(wid, moni, m1_r_buf_x, m1_r_buf_y, m1_r_buf_w, m1_r_buf_h)
+            }else if (moni==2){
+                resizewin_id(wid, moni, m2_r_buf_x, m2_r_buf_y, m2_r_buf_w, m2_r_buf_h)
+            }else if (moni==3){
+                resizewin_id(wid, moni, m3_r_buf_x, m3_r_buf_y, m3_r_buf_w, m3_r_buf_h)
+            }
+        }
+
         get_center_buf(moni, xbuf, ybuf, wbuf, hbuf) {
             if (moni==1) {
                 m1_c_buf_x := xbuf
@@ -864,6 +975,80 @@ global Enter_cnt := 0
                 m3_moni_top := moniTop
                 wp_init_flag := 1
             } 
+        }
+
+        set_id(moni, pos, wid){
+            if (moni==1){
+                if (pos==0){
+                    ;; center 
+                    m1_cid := wid
+                }else if (pos==1){
+                    ;; left
+                    m1_lid := wid
+                }else if (pos==2){
+                    ;; right
+                    m1_rid := wid
+                }
+            }else if (moni==2){
+                if (pos==0){
+                    ;; center 
+                    m2_cid := wid
+                }else if (pos==1){
+                    ;; left
+                    m2_lid := wid
+                }else if (pos==2){
+                    ;; right
+                    m2_rid := wid
+                }
+            }else if (moni==3){
+                if (pos==0){
+                    ;; center 
+                    m3_cid := wid
+                }else if (pos==1){
+                    ;; left
+                    m3_lid := wid
+                }else if (pos==2){
+                    ;; right
+                    m3_rid := wid
+                }
+            }
+        }
+
+        get_id(moni, pos){
+            if (moni==1){
+                if (pos==0){
+                    ;; center 
+                    return m1_cid
+                }else if (pos==1){
+                    ;; left
+                    return m1_lid
+                }else if (pos==2){
+                    ;; right
+                    return m1_rid
+                }
+            }else if (moni==2){
+                if (pos==0){
+                    ;; center 
+                    return m2_cid
+                }else if (pos==1){
+                    ;; left
+                    return m2_lid
+                }else if (pos==2){
+                    ;; right
+                    return m2_rid
+                }
+            }else if (moni==3){
+                if (pos==0){
+                    ;; center 
+                    return m3_cid
+                }else if (pos==1){
+                    ;; left
+                    return m3_lid
+                }else if (pos==2){
+                    ;; right
+                    return m3_rid
+                }
+            }
         }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

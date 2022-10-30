@@ -1,163 +1,172 @@
 ;; 2022/05/21 Taku Honda
 
-;--- config ---
-;; for vscode wheel script
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; config
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;; for vscode wheel script ;;;
 #MaxHotkeysPerInterval, 200
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; variable
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;---spjlekcial move---
-; 変数定義は一番最初で実行しないと、謎のエラーが起きる
-global winpane_on := 1
+;;; spjlekcial move ;;;
+    ; 変数定義は一番最初で実行しないと、謎のエラーが起きる
+    global winpane_on := 1
 
 ;;; winpane ;;;
-global wp_init_flag := 0
-global Xrate
-global Yrate
-global Wrate
-global Hrate
-global Xmou
-global Ymou
-global Xmou_rate
-global Ymou_rate
-global moni_sel
-global middle_rate
-global xedge := 0.01
-global yedge := 0.03
-global side_open_xrate := 0.01
-global side_open_yrate := 0.05
-global side_open_hrate := 0.85
-global center_open_yrate := 0.01
-global center_open_hrate := 0.95
-global midcenter_open_xrate := 0.05
-global midcenter_open_yrate := 0.05
-global midcenter_open_wrate := 0.9
-global midcenter_open_hrate := 0.85
-global left_side_click_flag := 0
-global right_side_click_flag := 0
-global side_click_moni
-global side_click_id
-global win_class
-global winid
-global m1_lid
-global m1_rid
-global m1_cid
-global m2_lid
-global m2_rid
-global m2_cid
-global m3_lid
-global m3_rid
-global m3_cid
+    global wp_init_flag := 0
+    global Xrate
+    global Yrate
+    global Wrate
+    global Hrate
+    global Xmou
+    global Ymou
+    global Xmou_rate
+    global Ymou_rate 
+    global moni_sel
+    global middle_rate
+    global xedge := 0.01
+    global yedge := 0.03
+    global side_open_xrate := 0.01
+    global side_open_yrate := 0.05
+    global side_open_hrate := 0.85
+    global center_open_yrate := 0.01
+    global center_open_hrate := 0.95
+    global midcenter_open_xrate := 0.05
+    global midcenter_open_yrate := 0.05
+    global midcenter_open_wrate := 0.9
+    global midcenter_open_hrate := 0.85
+    global left_side_click_flag := 0
+    global right_side_click_flag := 0
+    global side_click_moni
+    global side_click_id
+    global win_class
+    global winid
+    global m1_lid
+    global m1_rid
+    global m1_cid
+    global m2_lid
+    global m2_rid
+    global m2_cid
+    global m3_lid
+    global m3_rid
+    global m3_cid
 
-global m1_moni_left
-global m1_moni_top
-global m1_moni_width
-global m1_moni_height
-global m1_middle_rate := 0.3
-global m1_c_buf_x := 0.4
-global m1_c_buf_y := 0.4
-global m1_c_buf_w := 0.3
-global m1_c_buf_h := 0.4
-global m1_mc_buf_x := 0.4
-global m1_mc_buf_y := 0.3
-global m1_mc_buf_w := 0.3
-global m1_mc_buf_h := 0.4
-global m1_l_buf_x := 0.2
-global m1_l_buf_y := 0.4
-global m1_l_buf_w := 0.3
-global m1_l_buf_h := 0.4
-global m1_r_buf_x := 0.6
-global m1_r_buf_y := 0.4
-global m1_r_buf_w := 0.3
-global m1_r_buf_h := 0.4
+    global m1_moni_left
+    global m1_moni_top
+    global m1_moni_width
+    global m1_moni_height
+    global m1_middle_rate := 0.3
+    global m1_c_buf_x := 0.4
+    global m1_c_buf_y := 0.4
+    global m1_c_buf_w := 0.3
+    global m1_c_buf_h := 0.4
+    global m1_mc_buf_x := 0.4
+    global m1_mc_buf_y := 0.3
+    global m1_mc_buf_w := 0.3
+    global m1_mc_buf_h := 0.4
+    global m1_l_buf_x := 0.2
+    global m1_l_buf_y := 0.4
+    global m1_l_buf_w := 0.3
+    global m1_l_buf_h := 0.4
+    global m1_r_buf_x := 0.6
+    global m1_r_buf_y := 0.4
+    global m1_r_buf_w := 0.3
+    global m1_r_buf_h := 0.4
 
-global m2_moni_left
-global m2_moni_top
-global m2_moni_width
-global m2_moni_height
-global m2_middle_rate := 0.3
-global m2_c_buf_x := 0.4
-global m2_c_buf_y := 0.4
-global m2_c_buf_w := 0.3
-global m2_c_buf_h := 0.4
-global m2_mc_buf_x := 0.4
-global m2_mc_buf_y := 0.3
-global m2_mc_buf_w := 0.3
-global m2_mc_buf_h := 0.4
-global m2_l_buf_x := 0.2
-global m2_l_buf_y := 0.4
-global m2_l_buf_w := 0.3
-global m2_l_buf_h := 0.4
-global m2_r_buf_x := 0.6
-global m2_r_buf_y := 0.4
-global m2_r_buf_w := 0.3
-global m2_r_buf_h := 0.4
+    global m2_moni_left
+    global m2_moni_top
+    global m2_moni_width
+    global m2_moni_height
+    global m2_middle_rate := 0.3
+    global m2_c_buf_x := 0.4
+    global m2_c_buf_y := 0.4
+    global m2_c_buf_w := 0.3
+    global m2_c_buf_h := 0.4
+    global m2_mc_buf_x := 0.4
+    global m2_mc_buf_y := 0.3
+    global m2_mc_buf_w := 0.3
+    global m2_mc_buf_h := 0.4
+    global m2_l_buf_x := 0.2
+    global m2_l_buf_y := 0.4
+    global m2_l_buf_w := 0.3
+    global m2_l_buf_h := 0.4
+    global m2_r_buf_x := 0.6
+    global m2_r_buf_y := 0.4
+    global m2_r_buf_w := 0.3
+    global m2_r_buf_h := 0.4
 
-global m3_moni_left
-global m3_moni_top
-global m3_moni_width
-global m3_moni_height
-global m3_middle_rate := 0.3
-global m3_c_buf_x := 0.4
-global m3_c_buf_y := 0.4
-global m3_c_buf_w := 0.3
-global m3_c_buf_h := 0.4
-global m3_mc_buf_x := 0.4
-global m3_mc_buf_y := 0.3
-global m3_mc_buf_w := 0.3
-global m3_mc_buf_h := 0.4
-global m3_l_buf_x := 0.2
-global m3_l_buf_y := 0.4
-global m3_l_buf_w := 0.3
-global m3_l_buf_h := 0.4
-global m3_r_buf_x := 0.6
-global m3_r_buf_y := 0.4
-global m3_r_buf_w := 0.3
-global m3_r_buf_h := 0.4
+    global m3_moni_left
+    global m3_moni_top
+    global m3_moni_width
+    global m3_moni_height
+    global m3_middle_rate := 0.3
+    global m3_c_buf_x := 0.4
+    global m3_c_buf_y := 0.4
+    global m3_c_buf_w := 0.3
+    global m3_c_buf_h := 0.4
+    global m3_mc_buf_x := 0.4
+    global m3_mc_buf_y := 0.3
+    global m3_mc_buf_w := 0.3
+    global m3_mc_buf_h := 0.4
+    global m3_l_buf_x := 0.2
+    global m3_l_buf_y := 0.4
+    global m3_l_buf_w := 0.3
+    global m3_l_buf_h := 0.4
+    global m3_r_buf_x := 0.6
+    global m3_r_buf_y := 0.4
+    global m3_r_buf_w := 0.3
+    global m3_r_buf_h := 0.4
 
 ;;; keep memo ;;;
-global km_mode := 0
-global km_pid := 28176
-global km_x := 600
-global km_y := 300
-global km_w := 1200
-global km_h := 800
-global km2_mode := 0
+    global km_mode := 0
+    global km_pid := 28176
+    global km_x := 600
+    global km_y := 300
+    global km_w := 1200
+    global km_h := 800
+    global km2_mode := 0
 
 ;;; miro ;;;
-global rclick_flag := 0
+    global rclick_flag := 0
 
 ;;; vscode ;;;
-global  := 0
+    global  := 0
 
 ;;; excel vim ;;;
-global ev_mode := 0
-global normal_mode := 0
-global insert_mode := 1
-global visual_mode := 2
-global visual_line_mode := 3
-global space_mode := 4
-global visual_line_cp := 0
-global space_cnt := 0
-global Enter_cnt := 0
+    global ev_mode := 0
+    global normal_mode := 0
+    global insert_mode := 1
+    global visual_mode := 2
+    global visual_line_mode := 3
+    global space_mode := 4
+    global visual_line_cp := 0
+    global space_cnt := 0 
+    global Enter_cnt := 0
+
+;;; onenote ;;;
+    global hand_move := 0
 
 ;;; excel ;;;
-
 ;;; powerpoint ;;;
-global scroll_val := 0
+    global scroll_val := 0
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; reset key ;;;;;;;;;;;;;;;;;;;;;;;
+; reset key
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
     ; F13 & q::send {Blind}^q
-    ; F13 & w::send {Blind}^w
-    ; F13 & e::send {Blind}^e
+    F13 & w::send {Blind}^w
+    F13 & e::send {Blind}^e
     F13 & r::send {Blind}^r
     ; F13 & t::send {Blind}^t
     F13 & y::send {Blind}^y
     F13 & u::send {Blind}^u
     ; F13 & i::send {Blind}^i
-    ; F13 & o::send {Blind}^o
+    F13 & o::send {Blind}^o
     F13 & p::send {Blind}^p
     F13 & a::send {Blind}^a
     F13 & s::send {Blind}^s
@@ -194,9 +203,8 @@ global scroll_val := 0
     F13 & Space::send {Blind}^{Space}
     F13 & Enter::send {Blind}^{Enter}
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; basic key setting ;;;;;;;;;;;;;;;
+; basic key setting
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     ;---2 times F13---
@@ -210,7 +218,7 @@ global scroll_val := 0
     ;     }
     ;     return
 
-    ;---cursol move---
+;---cursol move---
     ; F13 & K::send {Blind}{Up}
     ; F13 & J::send {Blind}{Down}
     ; F13 & H::send {Blind}{Left}
@@ -234,13 +242,24 @@ global scroll_val := 0
     +^Down::Send  +{PgDn}
     +^Left::Send  +{Home}
     +^Right::Send +{End}
-    ;---other---
+;---num pad---
+    Numpad0::send ^#t
+    ; Numpad1::
+    ; Numpad2::
+    ; Numpad3::
+    ; Numpad4::
+    ; Numpad5::
+    ; Numpad6::
+    ; Numpad7::
+    ; Numpad8::
+    ; Numpad9::
+;---other---
     PgUp::send {left}
     PgDn::send {right}
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; winpane ;;;;;;;;;;;;;;;;;;;;;;;;;;
+; winpane
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         F1::
             CoordMode, Mouse, Screen ;; mouse absolute pos setting
@@ -1117,7 +1136,7 @@ global scroll_val := 0
         }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; keep memo ;;;;;;;;;;;;;;;;;;;;;;;
+; keep memo
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     F13 & t::
@@ -1148,36 +1167,36 @@ global scroll_val := 0
         }
         return
 
-    F13 & o::
-        if (km2_mode==0){
-            WinRestore, ahk_exe Obsidian.exe
-            WinActivate, ahk_exe Obsidian.exe
-            WinGetPos,X,Y,W,H,A  
-            km_x :=X
-            km_y :=Y
-            km_w :=W
-            km_h :=H
-            if (km_mode==1){
-                km_mode := 0 
-            }
-            km2_mode := 1
-        }else {
-            WinActivate, ahk_exe Obsidian.exe
-            WinGetPos,X,Y,W,H,A  
-            WinMinimize, ahk_exe Obsidian.exe
-            km_x :=X
-            km_y :=Y
-            km_w :=W
-            km_h :=H
-            if (km_mode==1){
-                km_mode := 0 
-            }
-            km2_mode := 0
-        }
-        return
+    ; F13 & o::
+    ;     if (km2_mode==0){
+    ;         WinRestore, ahk_exe Obsidian.exe
+    ;         WinActivate, ahk_exe Obsidian.exe
+    ;         WinGetPos,X,Y,W,H,A  
+    ;         km_x :=X
+    ;         km_y :=Y
+    ;         km_w :=W
+    ;         km_h :=H
+    ;         if (km_mode==1){
+    ;             km_mode := 0 
+    ;         }
+    ;         km2_mode := 1
+    ;     }else {
+    ;         WinActivate, ahk_exe Obsidian.exe
+    ;         WinGetPos,X,Y,W,H,A  
+    ;         WinMinimize, ahk_exe Obsidian.exe
+    ;         km_x :=X
+    ;         km_y :=Y
+    ;         km_w :=W
+    ;         km_h :=H
+    ;         if (km_mode==1){
+    ;             km_mode := 0 
+    ;         }
+    ;         km2_mode := 0
+    ;     }
+    ;     return
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Miro ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Miro
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     #IfWinActive,ahk_exe Miro.exe
         ; LButton::
@@ -1219,13 +1238,13 @@ global scroll_val := 0
     #IfWinActive
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; VScode ;;;;;;;;;;;;;;;;;;;;;;;;;;
+; VScode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     #IfWinActive,ahk_exe Code.exe
     #IfWinActive
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Onenote ;;;;;;;;;;;;;;;;;;;;;;;;;
+; Onenote
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     #IfWinActive,ahk_exe ONENOTE.EXE
         ;; Double Click as create new TEXT
@@ -1246,10 +1265,65 @@ global scroll_val := 0
             send {Home}{Enter}
             send {PgUp}
             return
+        ~Lshift & WheelUp::ComObjActive("OneNote.Application").ActiveWindow.SmallScroll(0,0,0,1)
+        ~Lshift & WheelDown::ComObjActive("OneNote.Application").ActiveWindow.SmallScroll(0,0,1,0)
+        ; WheelUp::ComObjActive("Onenote.Application").ActiveWindow.SmallScroll(0,0,0,1)
+        ; WheelDown::ComObjActive("Onenote.Application").ActiveWindow.SmallScroll(0,0,1,0)
+        Numpad7::
+            if (hand_move==0){
+                send, {AltDown}{AltUp}
+                Sleep, 100
+                send, d
+                Sleep, 100
+                send, y
+                hand_move := 1
+            }else{
+                send, {Esc}
+                MouseMove, 1, 0 , 0, R
+                hand_move := 0
+            }
+            Return
+        Numpad0:: 
+            send, {Alt}
+            Sleep, 100
+            send, w
+            Sleep, 100
+            send, z
+            Sleep, 100
+            send, w
+            Sleep, 100
+            send, o
+            Return
+        Numpad8::
+            send, .{Enter}
+            send, .{Enter}
+            send, .{Enter}
+            send, {ShiftDown}
+            dllcall("keybd_event", int, 0x26, int, 0, int, 1, int, 0)
+            Sleep, 500
+            dllcall("keybd_event", int, 0x26, int, 0, int, 1, int, 0)
+            Sleep, 500
+            dllcall("keybd_event", int, 0x26, int, 0, int, 1, int, 0)
+            Sleep, 500
+            send, ^.
+            send, {ShiftUp}
+            send, {Esc}
+            send, {Delete}
+            dllcall("keybd_event", int, 0x28, int, 0, int, 1, int, 0)
+            Sleep, 200
+            send, {Delete}
+            dllcall("keybd_event", int, 0x28, int, 0, int, 1, int, 0)
+            Sleep, 200
+            send, {Delete}
+            dllcall("keybd_event", int, 0x26, int, 0, int, 1, int, 0)
+            Sleep, 200
+            dllcall("keybd_event", int, 0x26, int, 0, int, 1, int, 0)
+            Sleep, 200
+            Return
     #IfWinActive
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Excel ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Excel
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     #IfWinActive,ahk_exe EXCEL.exe
@@ -1503,16 +1577,28 @@ global scroll_val := 0
         ev_mode := 4
     }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; PowerPoint ;;;;;;;;;;;;;;;;;;;;;;
+; PowerPoint
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     #IfWinActive,ahk_exe POWERPNT.EXE
-        Tab:: send, !1
-        +Tab:: send, !2
+        Tab:: send, !7
+        +Tab:: send, !8
         ^Right:: send, {Tab}
         ^Left:: send, +{Tab}
         ~Lshift & WheelUp::ComObjActive("PowerPoint.Application").ActiveWindow.SmallScroll(0,0,0,1)
         ~Lshift & WheelDown::ComObjActive("PowerPoint.Application").ActiveWindow.SmallScroll(0,0,1,0)
+        ^Enter::
+            Send, !2
+            Send, {right}
+            return
+        +^Enter::
+            Send, !1
+            Send, {right}
+            return
+        F13 & BS::
+            Send, !6
+            Send, {right}
+            return
         ^WheelUp::
             if (scroll_val>-10 && scroll_val<15) {
                 if (scroll_val == 14){
@@ -1520,57 +1606,7 @@ global scroll_val := 0
                     scroll_val := scroll_val + 1
                 }
             }
-            if (scroll_val==0){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 100 
-            }else if (scroll_val==1){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 110 
-            }else if (scroll_val==2){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 120 
-            }else if (scroll_val==3){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 130 
-            }else if (scroll_val==4){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 140 
-            }else if (scroll_val==5){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 150 
-            }else if (scroll_val==6){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 160 
-            }else if (scroll_val==7){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 170 
-            }else if (scroll_val==8){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 180 
-            }else if (scroll_val==9){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 190 
-            }else if (scroll_val==10){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 200 
-            }else if (scroll_val==11){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 210 
-            }else if (scroll_val==12){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 220 
-            }else if (scroll_val==13){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 230 
-            }else if (scroll_val==14){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 240 
-            }else if (scroll_val==15){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 250 
-            }else if (scroll_val==-1){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 90 
-            }else if (scroll_val==-2){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 80 
-            }else if (scroll_val==-3){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 70 
-            }else if (scroll_val==-4){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 60 
-            }else if (scroll_val==-5){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 50
-            }else if (scroll_val==-6){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 40 
-            }else if (scroll_val==-7){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 30 
-            }else if (scroll_val==-8){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 20 
-            }else if (scroll_val==-9){
-                ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 10 
-            }
+            zoom()
             return
         ^WheelDown::
             if (scroll_val>-10 && scroll_val<15) {
@@ -1579,6 +1615,15 @@ global scroll_val := 0
                     scroll_val := scroll_val - 1
                 }
             }
+            zoom()
+            return
+        Numpad7:: 
+            ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 30
+            return
+        Numpad8:: 
+            send, {Alt}0N
+            Return
+        zoom(){
             if (scroll_val==0){
                 ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 100 
             }else if (scroll_val==1){
@@ -1630,7 +1675,8 @@ global scroll_val := 0
             }else if (scroll_val==-9){
                 ComObjActive("PowerPoint.Application").ActiveWindow.View.Zoom := 10 
             }
-            return
+        }
+
     #IfWinActive
 
     
